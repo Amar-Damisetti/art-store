@@ -951,3 +951,12 @@ body {
     overflow: hidden !important;
   }
 }
+/* Automatically hide the Secret Code pill whenever the checkout modal, order form, or cart drawer is open */
+body.checkout-open #surpriseOfferPill,
+body.modal-open #surpriseOfferPill,
+.modal.active ~ #surpriseOfferPill,
+.checkout-modal.active ~ #surpriseOfferPill,
+[id*="checkout"][style*="display: flex"] ~ #surpriseOfferPill,
+[id*="orderModal"][style*="display: flex"] ~ #surpriseOfferPill {
+  display: none !important;
+}

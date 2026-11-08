@@ -653,7 +653,7 @@
      onclick="openSecretPopup()" 
      style="position: fixed; bottom: 80px; left: 20px; z-index: 999999; background: #ffffff; border: 1.5px solid #ff3366; border-radius: 30px; padding: 8px 16px; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 24px rgba(255, 51, 102, 0.2); cursor: pointer; pointer-events: auto;">
   <span style="font-size: 1.2rem;">🎁</span>
-  <span style="font-size: 0.82rem; font-weight: 700; color: #22223b;">Tap for Today's Secret Code</span>
+  <span style="font-size: 0.82rem; font-weight: 700; color: #22223b;">coupon Code</span>
 </div>
 
 <!-- Built-In Secret Code Popup Modal -->
@@ -818,5 +818,23 @@ function copySecretCode() {
     <span style="font-size: 1.1rem;">⚠️</span>
     <span id="paymentStatusToastMsg">Payment Failed or Cancelled. Please retry or choose Cash on Delivery.</span>
   </div>
+  <script>
+// Auto-hide Secret Code Pill when Checkout / Order Modal is visible
+setInterval(() => {
+  const secretPill = document.getElementById('surpriseOfferPill');
+  if (!secretPill) return;
+
+  // Search for any active checkout/order containers
+  const checkoutOpen = document.querySelector(
+    '.checkout-modal.active, #checkoutModal[style*="display: block"], #checkoutModal[style*="display: flex"], #orderFormModal[style*="display: flex"], .modal-overlay.active'
+  );
+
+  if (checkoutOpen) {
+    secretPill.style.display = 'none';
+  } else {
+    secretPill.style.display = 'flex';
+  }
+}, 300);
+</script>
 </body>
 </html>
