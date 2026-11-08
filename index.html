@@ -648,13 +648,62 @@
   </style>
 
   <script src="script.js"></script>
- <!-- Floating Gift Box Offer Badge -->
+<!-- Floating Secret Code Pill -->
 <div id="surpriseOfferPill" 
-     onclick="document.getElementById('secretCodeModal').style.display='flex'; document.getElementById('secretCodeModal').classList.add('active');" 
-     style="position: fixed; bottom: 80px; left: 20px; z-index: 99999; background: #ffffff; border: 1.5px solid #ff3366; border-radius: 30px; padding: 8px 16px; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 24px rgba(255, 51, 102, 0.2); cursor: pointer; pointer-events: auto;">
+     onclick="openSecretPopup()" 
+     style="position: fixed; bottom: 80px; left: 20px; z-index: 999999; background: #ffffff; border: 1.5px solid #ff3366; border-radius: 30px; padding: 8px 16px; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 24px rgba(255, 51, 102, 0.2); cursor: pointer; pointer-events: auto;">
   <span style="font-size: 1.2rem;">🎁</span>
   <span style="font-size: 0.82rem; font-weight: 700; color: #22223b;">Tap for Today's Secret Code</span>
 </div>
+
+<!-- Built-In Secret Code Popup Modal -->
+<div id="vyoraSecretModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px);">
+  <div style="background: #ffffff; border-radius: 20px; max-width: 360px; width: 100%; padding: 24px; text-align: center; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.25);">
+    <button onclick="closeSecretPopup()" style="position: absolute; top: 12px; right: 14px; background: none; border: none; font-size: 20px; color: #666; cursor: pointer;">✕</button>
+    <div style="font-size: 2.5rem; margin-bottom: 8px;">🎁</div>
+    <h3 style="margin: 0 0 6px 0; color: #1a1a1a; font-size: 1.2rem;">Today's Secret Code!</h3>
+    <p style="color: #666; font-size: 0.85rem; margin: 0 0 16px 0;">Apply this code at checkout for a special surprise discount.</p>
+    
+    <div style="background: #fff0f3; border: 1.5px dashed #ff3366; border-radius: 12px; padding: 12px; font-weight: 800; font-size: 1.3rem; letter-spacing: 2px; color: #ff3366; margin-bottom: 16px;" id="popupCodeText">
+      VYORA10
+    </div>
+    
+    <button onclick="copySecretCode()" id="copyCodeBtn" style="width: 100%; background: #ff3366; color: #fff; border: none; border-radius: 30px; padding: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer;">
+      Copy Code & Shop
+    </button>
+  </div>
+</div>
+
+<script>
+function openSecretPopup() {
+  // Check if admin saved a custom code in localStorage, otherwise use VYORA10
+  const savedCode = localStorage.getItem('secretPromoCode') || localStorage.getItem('todaySecretCode') || 'VYORA10';
+  const codeEl = document.getElementById('popupCodeText');
+  if (codeEl) codeEl.innerText = savedCode;
+  
+  const modal = document.getElementById('vyoraSecretModal');
+  if (modal) modal.style.display = 'flex';
+}
+
+function closeSecretPopup() {
+  const modal = document.getElementById('vyoraSecretModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function copySecretCode() {
+  const code = document.getElementById('popupCodeText').innerText.trim();
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.getElementById('copyCodeBtn');
+    btn.innerText = 'Copied to Clipboard! ✓';
+    btn.style.background = '#2b9348';
+    setTimeout(() => {
+      closeSecretPopup();
+      btn.innerText = 'Copy Code & Shop';
+      btn.style.background = '#ff3366';
+    }, 1200);
+  });
+}
+</script>
  <!-- ========================================== -->
   <!-- 🎁 SECRET VOUCHER POPUP MODAL (VYORA)      -->
   <!-- ========================================== -->
