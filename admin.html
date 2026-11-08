@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VYORA Admin | Store, Inventory & Order Manager</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="images/logo1.png" />
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background-color: #f7f8fa;
+      color: #333;
+      padding: 30px 5%;
+    }
+
+    #loginOverlay {
+      position: fixed;
+      inset: 0;
+      background: #111827;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .login-card {
+      background: #ffffff;
+      padding: 35px 30px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 380px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+
+    .login-card img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    .login-card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      color: #ff3366;
+      margin-bottom: 6px;
+    }
+
+    .login-card p {
+      font-size: 0.88rem;
+      color: #6b7280;
+      margin-bottom: 22px;
+    }
+
+    .login-card input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-bottom: 14px;
+      outline: none;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+
+    .login-card button {
+      width: 100%;
+      padding: 12px;
+      background: #ff3366;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .error-msg {
+      color: #dc2626;
+      font-size: 0.82rem;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+      padding: 24px 30px;
+      border-radius: 14px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.7rem;
+      color: #ff3366;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-manual-order { background: linear-gradient(135deg, #ff3366, #ff758c); color: #fff; box-shadow: 0 3px 10px rgba(255, 51, 102, 0.25); }
+    .btn-export { background: #059669; color: #fff; }
+    .btn-logout { background: #fee2e2; color: #dc2626; }
+    .btn-back { background: #f3f4f6; color: #4b5563; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 18px;
+      margin-bottom: 25px;
+    }
+
+    .stat-card {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #6b7280;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #111827;
+      margin-top: 6px;
+    }
+
+    .table-container {
+      background: #ffffff;
+      border-radius: 14px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+      overflow-x: auto;
+      padding: 24px;
+      margin-bottom: 25px;
+    }
+
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .search-wrapper {
+      position: relative;
+      min-width: 320px;
+      max-width: 480px;
+      flex: 1;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 11px 16px 11px 40px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      outline: none;
+      background: #fafafa;
+    }
+
+    .search-input:focus {
+      border-color: #ff3366;
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(255, 51, 102, 0.12);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+      color: #9ca3af;
+      pointer-events: none;
+    }
+
+    .search-match-text {
+      font-size: 0.82rem;
+      color: #6b7280;
+      font-weight: 500;
+      margin-top: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.92rem;
+    }
+
+    th {
+      background-color: #f9fafb;
+      color: #4b5563;
+      padding: 14px 16px;
+      font-weight: 600;
+      border-bottom: 2px solid #e5e7eb;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #f3f4f6;
+      vertical-align: top;
+    }
+
+    .admin-art-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .actions-cell {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .btn-edit { background: #e0f2fe; color: #0284c7; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+    .btn-delete { background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+    
+    .btn-link {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.82rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-link:hover {
+      background: #bbf7d0;
+    }
+
+    .btn-ping-whatsapp {
+      background: #25d366;
+      color: #ffffff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.82rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+    }
+    .btn-ping-whatsapp:hover {
+      background: #1ebc59;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status-pending { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .status-crafting { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+    .status-shipped { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .status-delivered { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+
+    .add-product-container {
+      background: #ffffff;
+      padding: 26px 30px;
+      border-radius: 14px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+      margin-bottom: 25px;
+    }
+
+    .form-grid-3 {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #4b5563;
+      margin-bottom: 5px;
+      margin-top: 12px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      outline: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #ff3366;
+    }
+
+    .admin-media-box {
+      background: #fff8f9;
+      border: 1.5px dashed #ffccd5;
+      padding: 16px 18px;
+      border-radius: 12px;
+      margin-top: 16px;
+    }
+
+    .preview-thumb-box {
+      width: 55px;
+      height: 55px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1.5px solid #ff3366;
+      background: #f3f4f6;
+    }
+
+    .preview-thumb-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .preview-video-tag {
+      background: #0284c7;
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      height: 28px;
+      margin-top: 14px;
+    }
+
+    .form-buttons {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-top: 18px;
+    }
+
+    .btn-add-art {
+      background: linear-gradient(135deg, #ff3366, #ff758c);
+      color: #ffffff;
+      padding: 12px 24px;
+      font-size: 0.95rem;
+    }
+
+    .btn-cancel-edit {
+      background: #f3f4f6;
+      color: #4b5563;
+      display: none;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 24, 39, 0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      padding: 20px;
+    }
+
+    .modal-box-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 560px;
+      border-radius: 16px;
+      padding: 26px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Password Lock Screen (PIN: 1234) -->
+  <div id="loginOverlay">
+    <div class="login-card">
+      <img src="images/logo1.png" alt="VYORA Logo" onerror="this.style.display='none'" />
+      <h2>VYORA Admin Lock</h2>
+      <p>Enter the store management PIN to continue.</p>
+      
+      <form id="loginForm">
+        <input type="password" id="adminPassword" placeholder="Enter Secret PIN" autofocus required />
+        <button type="submit">Unlock Dashboard</button>
+        <div id="loginError" class="error-msg">Incorrect PIN. Please try again.</div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Panel Content -->
+  <div id="adminContent" style="display: none;">
+    <header class="admin-header">
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <img src="images/logo1.png" alt="VYORA Logo" onerror="this.style.display='none'" style="width: 50px; height: 50px; border-radius: 12px; object-fit: cover; box-shadow: 0 4px 12px rgba(255, 51, 102, 0.25);" />
+        <div>
+          <h1 class="brand-title">VYORA Store & Category Manager</h1>
+          <p style="color: #6b7280; font-size: 0.88rem;">Track live orders, log phone orders, and manage handcrafted inventory.</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-manual-order" id="openManualOrderModalBtn">✍️ + Log Offline Order</button>
+        <button class="btn btn-export" id="exportBtn">📥 Export CSV</button>
+        <button class="btn btn-logout" id="logoutBtn">🔒 Lock</button>
+        <a href="index.html" class="btn btn-back">← Back to Store</a>
+      </div>
+    </header>
+
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Customer Orders</div>
+        <div class="stat-value" id="totalOrders">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Estimated Revenue</div>
+        <div class="stat-value" id="totalRevenue">₹0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Products Listed</div>
+        <div class="stat-value" id="totalArtworksCount">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Customer Reviews</div>
+        <div class="stat-value" id="totalReviewsCount">0</div>
+      </div>
+    </div>
+    
+
+    <!-- 1. Customer Orders Table with WhatsApp Ping Button -->
+    <div class="table-container">
+      <div class="table-toolbar">
+        <div>
+          <h3 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #22223b;">
+            📦 Customer Orders & Custom Preferences
+          </h3>
+          <p style="font-size: 0.85rem; color: #6b7280;">Click <strong>💬 Ping Customer</strong> to send live tracking updates to WhatsApp.</p>
+        </div>
+
+        <div class="search-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="orderSearchInput" class="search-input" placeholder="Search customer name, phone, or ID..." />
+          <div id="searchMatchText" class="search-match-text"></div>
+        </div>
+      </div>
+
+      <table id="ordersTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Order ID</th>
+            <th>Status</th>
+            <th>Est. Delivery</th>
+            <th>Item</th>
+            <th>Customization</th>
+            <th>Item Cost</th>
+            <th>Delivery Fee</th>
+            <th>Grand Total</th>
+            <th>Customer Info</th>
+            <th>Shipping Address & Maps</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTbody"></tbody>
+      </table>
+    </div>
+
+    <!-- 2. Product Inventory Form -->
+    <div class="add-product-container">
+      <h3 id="formHeading" style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #22223b;">
+        📦 Add New Product to Storefront
+      </h3>
+      <p id="formSubtext" style="color: #6b7280; font-size: 0.88rem; margin-bottom: 14px;">
+        Add artworks or homemade treats. You can assign any category or custom choices.
+      </p>
+
+      <form id="productForm">
+        <input type="hidden" id="editIndex" value="-1" />
+
+        <div class="form-grid-3">
+          <div>
+            <label>Product Title *</label>
+            <input type="text" id="newTitle" placeholder="e.g. Dark Chocolate Almond Cookies" required />
+          </div>
+          <div>
+            <label>Department / Main Category *</label>
+            <select id="newMainCategory" required>
+              <option value="artwork">🎨 Art Works</option>
+              <option value="bakery">🍪 Gourmet Bakery & Treats</option>
+            </select>
+          </div>
+          <div>
+            <label>Sub-Category Name *</label>
+            <input type="text" id="newSubCategory" placeholder="e.g. Bottle Art, Resin Art, Cookies, Chocolates" required />
+          </div>
+        </div>
+
+        <div class="form-grid-3">
+          <div>
+            <label>Original Price (₹) *</label>
+            <input type="text" id="newOriginalPrice" placeholder="e.g. ₹600" required />
+          </div>
+          <div>
+            <label>Selling / Discount Price (₹) *</label>
+            <input type="text" id="newDiscountPrice" placeholder="e.g. ₹450" required />
+          </div>
+          <div>
+            <label>Discount Badge</label>
+            <input type="text" id="newBadge" placeholder="e.g. 25% OFF" value="20% OFF" />
+          </div>
+        </div>
+
+        <div style="background: #fdf2f4; padding: 14px; border-radius: 10px; margin-top: 14px;">
+          <label style="margin: 0 0 6px 0; display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="newCustomizable" style="width: auto;">
+            <span>Allow Customer Customization? (e.g. select nuts, toppings, frame colors)</span>
+          </label>
+          <input type="text" id="newCustomOptions" placeholder="Comma-separated choices: Roasted Almonds, Cashews, Walnuts, Choco-chips" />
+          <small style="color: #666; font-size: 0.78rem;">If checked, customer can pick their desired mix on the product page!</small>
+        </div>
+
+        <div class="admin-media-box">
+          <h4 style="font-size: 0.95rem; color: #ff3366; margin-bottom: 8px;">📸 Artwork & Bakery Media (Photos & Video)</h4>
+          <div>
+            <label for="newImage">Photo URLs or Local Paths (Separate multiple links with commas or new lines) *</label>
+            <textarea id="newImage" rows="2" placeholder="images/bottle1.jpg, https://...jpg" required></textarea>
+          </div>
+          <div>
+            <label for="newVideo">Reference Video Link (YouTube, Shorts, or MP4 — Optional)</label>
+            <input type="text" id="newVideo" placeholder="https://www.youtube.com/watch?v=..." />
+          </div>
+          <div id="mediaPreviewStrip" style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;"></div>
+        </div>
+
+        <div>
+          <label>Product Description *</label>
+          <textarea id="newDesc" rows="2" placeholder="Details about ingredients, art materials, or baking freshness..." required></textarea>
+        </div>
+
+        <div>
+          <label>Highlights (Comma separated)</label>
+          <input type="text" id="newHighlights" placeholder="e.g. Baked fresh on order, 100% Eggless, Premium packaging" />
+        </div>
+
+        <div class="form-buttons">
+          <button type="submit" class="btn btn-add-art" id="submitProductBtn">Add to Storefront</button>
+          <button type="button" class="btn btn-cancel-edit" id="cancelEditBtn">Cancel Edit</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 3. Current Inventory Table -->
+    <div class="table-container">
+      <h3 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #22223b; margin-bottom: 6px;">
+        🖼️ Current Store Inventory (Artworks & Food Items)
+      </h3>
+      <table id="artworksTable">
+        <thead>
+          <tr>
+            <th>Photo</th>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Sub-Category</th>
+            <th>Original</th>
+            <th>Discount Price</th>
+            <th>Customizable</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="artworksTbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <!-- 4. Customer Reviews Moderation Table -->
+    <div class="table-container">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h3 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #22223b;">
+            ⭐ Customer Reviews Moderation
+          </h3>
+          <p style="font-size: 0.85rem; color: #6b7280;">Review customer feedback. If any comment is abusive, fake, or spam, delete it with one click.</p>
+        </div>
+      </div>
+
+      <table id="reviewsAdminTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Author Name</th>
+            <th>Rating</th>
+            <th>Item Tag</th>
+            <th>Customer Comment / Testimonial</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="reviewsAdminTbody"></tbody>
+      </table>
+    </div>
+    <!-- 5. Promo Code & Discount Manager -->
+    <div class="table-container" style="margin-top: 25px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h3 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #22223b;">
+            🎟️ Store Promo Code & Discount Campaign
+          </h3>
+          <p style="font-size: 0.85rem; color: #6b7280;">
+            Control whether discounts are active. When turned OFF, the coupon box and floating gift bubble are hidden on the store.
+          </p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 0.9rem; font-weight: 600; color: #374151;">Promo System:</span>
+          <label style="position: relative; display: inline-block; width: 52px; height: 28px; margin: 0;">
+            <input type="checkbox" id="adminPromoToggle" style="opacity: 0; width: 0; height: 0;">
+            <span id="promoToggleSlider" style="position: absolute; cursor: pointer; inset: 0; background-color: #cbd5e1; transition: .3s; border-radius: 28px;"></span>
+          </label>
+          <span id="promoToggleStatusText" style="font-size: 0.88rem; font-weight: 700; color: #dc2626;">INACTIVE (OFF)</span>
+        </div>
+      </div>
+
+      <form id="adminPromoForm" style="background: #fff8f9; border: 1.5px dashed #ffd6e0; padding: 20px; border-radius: 12px; margin-top: 14px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+          <div>
+            <label style="font-size: 0.82rem; font-weight: 600; color: #4b5563; margin-bottom: 5px; display: block;">Coupon Code Name *</label>
+            <input type="text" id="adminPromoCode" placeholder="e.g. FESTIVE15" required style="text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700;" />
+          </div>
+
+          <div>
+            <label style="font-size: 0.82rem; font-weight: 600; color: #4b5563; margin-bottom: 5px; display: block;">Discount Type *</label>
+            <select id="adminPromoType" style="font-weight: 600;">
+              <option value="percent">Percentage Off (%)</option>
+              <option value="flat">Flat Cash Off (₹)</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size: 0.82rem; font-weight: 600; color: #4b5563; margin-bottom: 5px; display: block;">Discount Value *</label>
+            <input type="number" id="adminPromoValue" placeholder="e.g. 15 for 15% or 100 for ₹100" min="1" required />
+          </div>
+        </div>
+
+        <div style="margin-top: 14px;">
+          <label style="font-size: 0.82rem; font-weight: 600; color: #4b5563; margin-bottom: 5px; display: block;">Customer Display Offer Tagline</label>
+          <input type="text" id="adminPromoLabel" placeholder="e.g. Special 15% Festive Savings" />
+        </div>
+
+        <div style="margin-top: 16px; display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="submit" class="btn btn-add-art" style="padding: 10px 22px;">Save Promo Settings 💾</button>
+        </div>
+      </form>
+    </div>
+
+  <!-- POPUP MODAL 1: EDIT EXISTING ORDER -->
+  <div class="modal-overlay" id="editOrderModal">
+    <div class="modal-box-card">
+      <h3 style="font-family: 'Playfair Display', serif; font-size: 1.35rem; color: #22223b; margin-bottom: 4px;">
+        ✏️ Edit Order & Delivery Details
+      </h3>
+      <p style="font-size: 0.82rem; color: #6b7280; margin-bottom: 16px;">
+        Adjust distance shipping fee, delivery dates, or customization notes.
+      </p>
+
+      <form id="editOrderForm">
+        <input type="hidden" id="editOrderIndex" />
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+          <div>
+            <label style="margin-top:0;">Order ID</label>
+            <input type="text" id="editOrderId" readonly style="background:#f3f4f6; color:#666;" />
+          </div>
+          <div>
+            <label style="margin-top:0; color:#ff3366;">Order Status *</label>
+            <select id="editOrderStatus" style="border:1.5px solid #ffccd5; background:#fff8f9; font-weight:600;">
+              <option value="Pending">🟡 Pending (New)</option>
+              <option value="Crafting">🟠 Crafting / Baking</option>
+              <option value="Shipped">🔵 Dispatched / Shipped</option>
+              <option value="Delivered">🟢 Delivered</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+          <div>
+            <label style="margin-top:0;">Item Cost (₹)</label>
+            <input type="text" id="editItemPrice" required />
+          </div>
+          <div>
+            <label style="margin-top:0; color:#0284c7;">Delivery Fee (₹) *</label>
+            <input type="text" id="editDeliveryFee" placeholder="e.g. ₹40, ₹70, ₹130, or ₹0" required style="border-color:#bae6fd; background:#f0f9ff;" />
+          </div>
+        </div>
+
+        <div style="margin-bottom: 12px; background: #f0fdf4; border: 1.5px dashed #86efac; padding: 12px; border-radius: 10px;">
+          <label style="margin-top:0; color:#166534;">📅 Custom Estimated Delivery Date / Window</label>
+          <input type="text" id="editCustomDeliveryDate" placeholder="e.g. 5 Nov 2026 or Tomorrow by 4 PM" style="background:#fff; border-color:#86efac;" />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+          <div>
+            <label style="margin-top:0;">Customer Name</label>
+            <input type="text" id="editCustName" required />
+          </div>
+          <div>
+            <label style="margin-top:0;">Phone Number</label>
+            <input type="tel" id="editCustPhone" required />
+          </div>
+        </div>
+
+        <div style="margin-bottom: 10px;">
+          <label style="margin-top:0;">Custom Preferences / Blueprint</label>
+          <input type="text" id="editCustSelection" required />
+        </div>
+
+        <div style="margin-bottom: 10px;">
+          <label style="margin-top:0;">Special WhatsApp Notes / Requests</label>
+          <textarea id="editCustNotes" rows="2"></textarea>
+        </div>
+
+        <div style="margin-bottom: 10px;">
+          <label style="margin-top:0;">Delivery Address</label>
+          <textarea id="editCustAddress" rows="2" required></textarea>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <label style="margin-top:0; color:#0284c7;">📍 Google Maps Link (For Navigation)</label>
+          <input type="text" id="editGoogleMapsLink" placeholder="https://maps.google.com/?q=..." style="background:#f0f9ff;" />
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button type="button" class="btn btn-cancel-edit" id="closeEditOrderModalBtn" style="display:inline-block;">Cancel</button>
+          <button type="submit" class="btn btn-add-art" style="padding:10px 18px;">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- POPUP MODAL 2: ✍️ LOG OFFLINE / PHONE ORDER -->
+  <div class="modal-overlay" id="manualOrderModal">
+    <div class="modal-box-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f3f4f6; padding-bottom: 10px; margin-bottom: 14px;">
+        <div>
+          <span style="font-size: 0.76rem; font-weight: 700; color: #ff3366; text-transform: uppercase;">DIRECT SALES DESK</span>
+          <h3 style="font-family: 'Playfair Display', serif; font-size: 1.45rem; color: #22223b;">+ Log Offline / Phone Order</h3>
+        </div>
+        <button type="button" id="closeManualOrderModalBtn" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#9ca3af;">&times;</button>
+      </div>
+      
+      <p style="font-size: 0.82rem; color: #6b7280; margin-bottom: 14px;">
+        Log an order received via WhatsApp, phone call, or direct contact. A live tracking link will be generated automatically.
+      </p>
+
+      <form id="manualOrderForm">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+          <div>
+            <label style="margin-top:0;">Generated Order ID</label>
+            <input type="text" id="manualOrderId" readonly style="background:#f3f4f6; color:#111; font-weight:700;" />
+          </div>
+          <div>
+            <label style="margin-top:0; color:#ff3366;">Initial Status *</label>
+            <select id="manualOrderStatus" style="border:1.5px solid #ffccd5; background:#fff8f9; font-weight:600;">
+              <option value="Pending">🟡 Pending (New)</option>
+              <option value="Crafting" selected>🟠 Crafting / Baking</option>
+              <option value="Shipped">🔵 Dispatched / Shipped</option>
+              <option value="Delivered">🟢 Delivered</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 10px;">
+          <label style="margin-top:0;">Select Product Catalog Item (or choose Custom) *</label>
+          <select id="manualProductSelect" style="background:#fff; font-weight:500;">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+
+        <div id="manualCustomTitleBox" style="display:none; margin-bottom: 10px;">
+          <label style="margin-top:0; color:#ff3366;">Custom Item Name *</label>
+          <input type="text" id="manualCustomItemTitle" placeholder="e.g. Customized Nameplate Resin Art" />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+          <div>
+            <label style="margin-top:0;">Item Price (₹) *</label>
+            <input type="number" id="manualItemPrice" placeholder="500" required />
+          </div>
+          <div>
+            <label style="margin-top:0; color:#0284c7;">Delivery Fee (₹) *</label>
+            <input type="number" id="manualDeliveryFee" placeholder="70" value="70" required />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+          <div>
+            <label style="margin-top:0;">Payment Mode</label>
+            <select id="manualPaymentMethod">
+              <option value="Cash on Delivery (COD)">Cash on Delivery (COD)</option>
+              <option value="Paid via UPI (PhonePe/GPay)">Paid via UPI (Advance)</option>
+              <option value="Direct Cash Paid">Direct Cash Paid</option>
+            </select>
+          </div>
+          <div>
+            <label style="margin-top:0;">Estimated Delivery Date</label>
+            <input type="text" id="manualDeliveryDate" placeholder="e.g. Tomorrow by 3 PM" />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+          <div>
+            <label style="margin-top:0;">Customer Name *</label>
+            <input type="text" id="manualCustName" placeholder="Customer Name" required />
+          </div>
+          <div>
+            <label style="margin-top:0;">Customer Mobile *</label>
+            <input type="tel" id="manualCustPhone" placeholder="10-digit number" pattern="[0-9]{10}" required />
+          </div>
+        </div>
+
+        <div style="margin-bottom: 10px;">
+          <label style="margin-top:0;">Agreed Custom Preferences / Notes</label>
+          <input type="text" id="manualCustomSelection" placeholder="e.g. Extra Almonds, Warm Yellow Cork Light with Name 'Priya'" />
+        </div>
+
+        <div style="margin-bottom: 10px;">
+          <label style="margin-top:0;">Delivery Address *</label>
+          <textarea id="manualCustAddress" rows="2" placeholder="House No., Street, Landmark, City & Pincode" required></textarea>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label style="margin-top:0; color:#0284c7;">Google Maps Link (Optional)</label>
+          <input type="text" id="manualGoogleMapsLink" placeholder="https://maps.google.com/?q=..." style="background:#f0f9ff;" />
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button type="button" class="btn btn-cancel-edit" id="cancelManualOrderBtn" style="display:inline-block;">Cancel</button>
+          <button type="submit" class="btn btn-add-art" style="padding:10px 20px;">Save & Create Order 💾</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_SECRET_PIN = "1234";
+
+    // 👉 PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE (For syncing offline orders to Google Sheet):
+    const GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/PASTE_YOUR_WEB_APP_URL_HERE/exec";
+
+    const defaultStarterProducts = [
+      {
+        id: "art_bottle_1",
+        title: "Vintage Fairy Floral Glow Bottle",
+        mainCategory: "artwork",
+        mainCategoryName: "Art Works",
+        subCategory: "bottle_art",
+        subCategoryName: "Bottle Art",
+        originalPrice: "₹1,500",
+        discountPrice: "₹1,199",
+        discountBadge: "20% OFF",
+        description: "Hand-painted frosted glass bottle detailed with acrylic wild florals, sealed with waterproof glossy resin varnish, and pre-fitted with warm LED cork fairy lights.",
+        highlights: ["Waterproof acrylic coating", "Includes LED cork light", "Safe delivery"],
+        customizable: true,
+        customOptions: [],
+        images: ["images/bottle1.jpg", "https://images.unsplash.com/photo-1543257580-7269da773bf5?auto=format&fit=crop&w=800&q=80"],
+        video: ""
+      },
+      {
+        id: "art_bottle_2",
+        title: "Golden Mandala Silhouette Bottle",
+        mainCategory: "artwork",
+        mainCategoryName: "Art Works",
+        subCategory: "bottle_art",
+        subCategoryName: "Bottle Art",
+        originalPrice: "₹1,400",
+        discountPrice: "₹1,050",
+        discountBadge: "25% OFF",
+        description: "Intricate metallic gold dot-mandala artwork hand-drawn on an obsidian black matte bottle with battery-operated amber interior lighting.",
+        highlights: ["Precision handmade dot-mandala geometry", "Warm amber light", "Matte black finish"],
+        customizable: true,
+        customOptions: [],
+        images: ["https://images.unsplash.com/photo-1582562124811-c09040d0a901?auto=format&fit=crop&w=600&q=80"],
+        video: ""
+      },
+      {
+        id: "art_resin_1",
+        title: "Ocean Wave Resin Coasters (Set of 4)",
+        mainCategory: "artwork",
+        mainCategoryName: "Art Works",
+        subCategory: "resin_art",
+        subCategoryName: "Resin Art",
+        originalPrice: "₹1,200",
+        discountPrice: "₹850",
+        discountBadge: "29% OFF",
+        description: "Multilayered 3D ocean wave resin effect poured on high-grade wooden base.",
+        highlights: ["Set of 4 coasters", "High gloss resin", "Heat resistant"],
+        customizable: true,
+        customOptions: [],
+        images: ["https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=600&q=80"],
+        video: ""
+      },
+      {
+        id: "art_resin_2",
+        title: "Bespoke Dried Floral Preservation Resin Clock",
+        mainCategory: "artwork",
+        mainCategoryName: "Art Works",
+        subCategory: "resin_art",
+        subCategoryName: "Resin Art",
+        originalPrice: "₹2,800",
+        discountPrice: "₹2,199",
+        discountBadge: "21% OFF",
+        description: "12-inch statement wall clock embedded with real preserved botanical flowers and silent quartz movement.",
+        highlights: ["Real dried florals", "Ultra-silent quartz machine", "12-inch diameter"],
+        customizable: true,
+        customOptions: [],
+        images: ["https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=600&q=80"],
+        video: ""
+      },
+      {
+        id: "bake_cookie_ready_1",
+        title: "Signature Double Dark Choco-Chunk Cookies (Pack of 6)",
+        mainCategory: "bakery",
+        mainCategoryName: "Gourmet Bakery",
+        subCategory: "cookies",
+        subCategoryName: "Readymade Cookies",
+        originalPrice: "₹480",
+        discountPrice: "₹360",
+        discountBadge: "25% OFF",
+        description: "Rich cocoa cookies loaded with molten dark chocolate chunks and sea-salt flakes.",
+        highlights: ["Ready to eat", "100% Eggless", "Pure butter"],
+        customizable: false,
+        customOptions: [],
+        images: ["https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=600&q=80"],
+        video: ""
+      },
+      {
+        id: "bake_cookie_custom_1",
+        title: "Build-Your-Own Artisanal Nut Cookie Box (Box of 8)",
+        mainCategory: "bakery",
+        mainCategoryName: "Gourmet Bakery",
+        subCategory: "cookies",
+        subCategoryName: "Custom Cookies",
+        originalPrice: "₹699",
+        discountPrice: "₹520",
+        discountBadge: "25% OFF",
+        description: "Freshly baked butter cookies. Pick your favorite nut ratios and toppings!",
+        highlights: ["Baked fresh on order", "Choice of nuts", "100% Eggless"],
+        customizable: true,
+        customOptions: ["Roasted Californian Almonds", "Crunchy Goan Cashews", "Crisp Brain Walnuts", "Green Pistachio Slivers", "Dark Choco-Chips"],
+        images: ["https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=600&q=80"],
+        video: ""
+      },
+      {
+        id: "bake_choco_1",
+        title: "Bespoke Nut & Cranberry Dark Chocolate Slab (250g)",
+        mainCategory: "bakery",
+        mainCategoryName: "Gourmet Bakery",
+        subCategory: "chocolates",
+        subCategoryName: "Custom Chocolates",
+        originalPrice: "₹650",
+        discountPrice: "₹490",
+        discountBadge: "25% OFF",
+        description: "Artisanal slab crafted with 55% rich cocoa and customer-selected roasted dry fruits.",
+        highlights: ["Tempered in small batches", "Fresh roasted dry fruits", "Gift-ready box"],
+        customizable: true,
+        customOptions: ["Whole Roasted Almonds", "Salted Caramelized Cashews", "Roasted Hazelnut Crunch", "Tangy Dried Cranberries"],
+        images: ["https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=600&q=80"],
+        video: ""
+      }
+    ];
+
+    const loginOverlay = document.getElementById('loginOverlay');
+    const adminContent = document.getElementById('adminContent');
+    const loginForm = document.getElementById('loginForm');
+    const adminPassword = document.getElementById('adminPassword');
+    const loginError = document.getElementById('loginError');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    function unlockDashboard() {
+      loginOverlay.style.display = 'none';
+      adminContent.style.display = 'block';
+      loadAdminDashboard();
+      loadArtworksTable();
+      loadAdminReviewsTable();
+      loadAdminPromoSettings();
+    }
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (adminPassword.value === ADMIN_SECRET_PIN) {
+        sessionStorage.setItem('vyora_admin_logged', 'true');
+        unlockDashboard();
+      } else {
+        loginError.style.display = 'block';
+        adminPassword.value = '';
+      }
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      sessionStorage.removeItem('vyora_admin_logged');
+      window.location.reload();
+    });
+
+    if (sessionStorage.getItem('vyora_admin_logged') === 'true') {
+      unlockDashboard();
+    }
+
+    // Media Preview
+    const newImageInput = document.getElementById('newImage');
+    const newVideoInput = document.getElementById('newVideo');
+    const mediaPreviewStrip = document.getElementById('mediaPreviewStrip');
+
+    function updateMediaPreview() {
+      if (!mediaPreviewStrip) return;
+      mediaPreviewStrip.innerHTML = '';
+      const raw = newImageInput.value.trim();
+      const urls = raw.split(/[\n,]+/).map(u => u.trim()).filter(Boolean);
+
+      urls.forEach(url => {
+        const thumb = document.createElement('div');
+        thumb.className = 'preview-thumb-box';
+        thumb.innerHTML = `<img src="${url}" onerror="this.src='https://placehold.co/55x55?text=Invalid'" alt="Preview" />`;
+        mediaPreviewStrip.appendChild(thumb);
+      });
+
+      if (newVideoInput.value.trim()) {
+        const vidBadge = document.createElement('div');
+        vidBadge.className = 'preview-video-tag';
+        vidBadge.innerHTML = `🎬 Video Linked`;
+        mediaPreviewStrip.appendChild(vidBadge);
+      }
+    }
+
+    newImageInput.addEventListener('input', updateMediaPreview);
+    newVideoInput.addEventListener('input', updateMediaPreview);
+
+    function getArtworks() {
+      let stored = JSON.parse(localStorage.getItem('ciy_products') || 'null');
+      if (!stored || !Array.isArray(stored) || stored.length === 0) {
+        stored = defaultStarterProducts;
+        localStorage.setItem('ciy_products', JSON.stringify(stored));
+      }
+      return stored;
+    }
+
+    function loadArtworksTable() {
+      const products = getArtworks();
+      const tbody = document.getElementById('artworksTbody');
+      const countEl = document.getElementById('totalArtworksCount');
+      tbody.innerHTML = '';
+      countEl.textContent = products.length;
+
+      products.forEach((prod, index) => {
+        const tr = document.createElement('tr');
+        const firstImg = (prod.images && prod.images.length > 0) ? prod.images[0] : 'images/logo1.png';
+
+        tr.innerHTML = `
+          <td><img src="${firstImg}" alt="${prod.title || 'Product'}" class="admin-art-thumb" onerror="this.src='images/logo1.png'"></td>
+          <td><strong>${prod.title || 'Untitled'}</strong></td>
+          <td><span style="font-size:0.8rem; font-weight:600; color:#ff3366;">${prod.mainCategoryName || prod.mainCategory || 'General'}</span></td>
+          <td><span style="font-size:0.8rem; background:#f3f4f6; padding:3px 8px; border-radius:12px;">${prod.subCategoryName || prod.subCategory || '-'}</span></td>
+          <td style="color:#888; text-decoration:line-through;">${prod.originalPrice || '-'}</td>
+          <td style="color:#059669; font-weight:700;">${prod.discountPrice || '-'}</td>
+          <td>${prod.customizable ? '✅ Yes' : '❌ No'}</td>
+          <td>
+            <div class="actions-cell">
+              <button class="btn-link" onclick="copyWhatsAppOrderLink('${prod.id}', '${encodeURIComponent(prod.title)}')">🔗 Copy Link</button>
+              <button class="btn-edit" onclick="startEditArtwork(${index})">Edit</button>
+              <button class="btn-delete" onclick="deleteArtwork(${index})">Remove</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    window.copyWhatsAppOrderLink = function(productId, encodedTitle) {
+      const productTitle = decodeURIComponent(encodedTitle);
+      const userNotes = prompt(`Generate direct checkout link for "${productTitle}".\n\nEnter custom preferences agreed in WhatsApp (or leave blank):`, "");
+      
+      if (userNotes === null) return;
+
+      const origin = window.location.origin;
+      const pathname = window.location.pathname.replace('admin.html', 'index.html');
+      
+      let link = `${origin}${pathname}?order=${productId}`;
+      if (userNotes.trim() !== '') {
+        link += `&notes=${encodeURIComponent(userNotes.trim())}`;
+      }
+
+      navigator.clipboard.writeText(link).then(() => {
+        alert(`✅ Direct Checkout Link Copied!\n\n${link}\n\nYou can now paste (Ctrl+V) this directly into your WhatsApp chat.`);
+      }).catch(() => {
+        prompt("Copy this checkout link manually:", link);
+      });
+    };
+
+    const productForm = document.getElementById('productForm');
+    const editIndexInput = document.getElementById('editIndex');
+    const submitProductBtn = document.getElementById('submitProductBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+
+    window.startEditArtwork = function(index) {
+      const products = getArtworks();
+      const item = products[index];
+      if (!item) return;
+
+      editIndexInput.value = index;
+      document.getElementById('newTitle').value = item.title || '';
+      document.getElementById('newMainCategory').value = item.mainCategory || 'artwork';
+      document.getElementById('newSubCategory').value = item.subCategoryName || item.subCategory || '';
+      document.getElementById('newBadge').value = item.discountBadge || '20% OFF';
+      document.getElementById('newOriginalPrice').value = item.originalPrice || '';
+      document.getElementById('newDiscountPrice').value = item.discountPrice || '';
+      document.getElementById('newImage').value = item.images ? item.images.join(',\n') : '';
+      document.getElementById('newVideo').value = item.video || '';
+      document.getElementById('newDesc').value = item.description || '';
+      document.getElementById('newHighlights').value = item.highlights ? item.highlights.join(', ') : '';
+      document.getElementById('newCustomizable').checked = !!item.customizable;
+      document.getElementById('newCustomOptions').value = item.customOptions ? item.customOptions.join(', ') : '';
+
+      submitProductBtn.textContent = "Save Changes";
+      cancelEditBtn.style.display = "inline-block";
+      updateMediaPreview();
+      productForm.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    cancelEditBtn.addEventListener('click', resetFormMode);
+
+    function resetFormMode() {
+      productForm.reset();
+      editIndexInput.value = "-1";
+      submitProductBtn.textContent = "Add to Storefront";
+      cancelEditBtn.style.display = "none";
+      if (mediaPreviewStrip) mediaPreviewStrip.innerHTML = '';
+    }
+
+    productForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const title = document.getElementById('newTitle').value.trim();
+      const mainCat = document.getElementById('newMainCategory').value;
+      const subCatName = document.getElementById('newSubCategory').value.trim();
+      const subCatKey = subCatName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      const badge = document.getElementById('newBadge').value.trim() || "NEW";
+      const originalPrice = document.getElementById('newOriginalPrice').value.trim();
+      const discountPrice = document.getElementById('newDiscountPrice').value.trim();
+      const desc = document.getElementById('newDesc').value.trim();
+      const rawHighlights = document.getElementById('newHighlights').value.trim();
+      const isCustom = document.getElementById('newCustomizable').checked;
+      const rawCustomOptions = document.getElementById('newCustomOptions').value.trim();
+
+      const rawImages = document.getElementById('newImage').value.trim();
+      const images = rawImages.split(/[\n,]+/).map(img => img.trim()).filter(Boolean);
+      const video = document.getElementById('newVideo').value.trim();
+
+      const highlights = rawHighlights ? rawHighlights.split(',').map(h => h.trim()).filter(Boolean) : ["Handmade with premium ingredients"];
+      const customOptions = rawCustomOptions ? rawCustomOptions.split(',').map(o => o.trim()).filter(Boolean) : [];
+
+      const products = getArtworks();
+      const editIndex = parseInt(editIndexInput.value);
+
+      const productPayload = {
+        id: editIndex >= 0 ? products[editIndex].id : "prod_" + Date.now(),
+        title: title,
+        mainCategory: mainCat,
+        mainCategoryName: mainCat === 'artwork' ? 'Art Works' : 'Gourmet Bakery',
+        subCategory: subCatKey,
+        subCategoryName: subCatName,
+        originalPrice: originalPrice.startsWith('₹') ? originalPrice : '₹' + originalPrice,
+        discountPrice: discountPrice.startsWith('₹') ? discountPrice : '₹' + discountPrice,
+        discountBadge: badge,
+        description: desc,
+        highlights: highlights,
+        customizable: isCustom,
+        customOptions: customOptions,
+        images: images.length > 0 ? images : ["images/logo1.png"],
+        video: video
+      };
+
+      if (editIndex >= 0 && editIndex < products.length) {
+        products[editIndex] = productPayload;
+        alert(`"${title}" has been updated!`);
+      } else {
+        products.push(productPayload);
+        alert(`"${title}" added to your catalog!`);
+      }
+
+      localStorage.setItem('ciy_products', JSON.stringify(products));
+      resetFormMode();
+      loadArtworksTable();
+    });
+
+    window.deleteArtwork = function(index) {
+      const products = getArtworks();
+      if (confirm(`Remove "${products[index].title}"?`)) {
+        products.splice(index, 1);
+        localStorage.setItem('ciy_products', JSON.stringify(products));
+        loadArtworksTable();
+      }
+    };
+
+    // ==========================================================================
+    // ✍️ OFFLINE / MANUAL PHONE ORDER SYSTEM
+    // ==========================================================================
+    const openManualOrderModalBtn = document.getElementById('openManualOrderModalBtn');
+    const manualOrderModal = document.getElementById('manualOrderModal');
+    const closeManualOrderModalBtn = document.getElementById('closeManualOrderModalBtn');
+    const cancelManualOrderBtn = document.getElementById('cancelManualOrderBtn');
+    const manualOrderForm = document.getElementById('manualOrderForm');
+
+    const manualOrderId = document.getElementById('manualOrderId');
+    const manualOrderStatus = document.getElementById('manualOrderStatus');
+    const manualProductSelect = document.getElementById('manualProductSelect');
+    const manualCustomTitleBox = document.getElementById('manualCustomTitleBox');
+    const manualCustomItemTitle = document.getElementById('manualCustomItemTitle');
+    const manualItemPrice = document.getElementById('manualItemPrice');
+    const manualDeliveryFee = document.getElementById('manualDeliveryFee');
+    const manualPaymentMethod = document.getElementById('manualPaymentMethod');
+    const manualDeliveryDate = document.getElementById('manualDeliveryDate');
+    const manualCustName = document.getElementById('manualCustName');
+    const manualCustPhone = document.getElementById('manualCustPhone');
+    const manualCustomSelection = document.getElementById('manualCustomSelection');
+    const manualCustAddress = document.getElementById('manualCustAddress');
+    const manualGoogleMapsLink = document.getElementById('manualGoogleMapsLink');
+
+    function populateManualProductDropdown() {
+      const products = getArtworks();
+      manualProductSelect.innerHTML = '';
+
+      products.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.title} (${p.discountPrice})`;
+        opt.setAttribute('data-price', p.discountPrice.replace(/[^0-9]/g, ''));
+        opt.setAttribute('data-title', p.title);
+        opt.setAttribute('data-category', `${p.mainCategoryName} • ${p.subCategoryName}`);
+        manualProductSelect.appendChild(opt);
+      });
+
+      const customOpt = document.createElement('option');
+      customOpt.value = 'custom_order';
+      customOpt.textContent = '✨ Other / Bespoke Custom Art or Bakery Request';
+      manualProductSelect.appendChild(customOpt);
+
+      handleProductDropdownChange();
+    }
+
+    function handleProductDropdownChange() {
+      const selected = manualProductSelect.options[manualProductSelect.selectedIndex];
+      if (manualProductSelect.value === 'custom_order') {
+        manualCustomTitleBox.style.display = 'block';
+        manualCustomItemTitle.required = true;
+        manualItemPrice.value = '';
+      } else {
+        manualCustomTitleBox.style.display = 'none';
+        manualCustomItemTitle.required = false;
+        const defaultPrice = selected ? selected.getAttribute('data-price') : '500';
+        manualItemPrice.value = defaultPrice;
+      }
+    }
+
+    manualProductSelect.addEventListener('change', handleProductDropdownChange);
+
+    openManualOrderModalBtn.addEventListener('click', () => {
+      manualOrderId.value = "VY-" + Math.floor(100000 + Math.random() * 900000);
+      populateManualProductDropdown();
+      manualOrderModal.style.display = 'flex';
+    });
+
+    closeManualOrderModalBtn.addEventListener('click', () => { manualOrderModal.style.display = 'none'; });
+    cancelManualOrderBtn.addEventListener('click', () => { manualOrderModal.style.display = 'none'; });
+
+    function syncOfflineOrderToCloud(orderData) {
+      if (!GOOGLE_SHEET_WEBHOOK_URL || GOOGLE_SHEET_WEBHOOK_URL.includes("PASTE_YOUR_WEB_APP_URL_HERE")) return;
+
+      fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData)
+      }).catch(e => console.error("Cloud sync error:", e));
+    }
+
+    manualOrderForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const orderIdVal = manualOrderId.value;
+      const statusVal = manualOrderStatus.value;
+      const isCustom = manualProductSelect.value === 'custom_order';
+      const selectedOpt = manualProductSelect.options[manualProductSelect.selectedIndex];
+
+      const itemTitle = isCustom ? manualCustomItemTitle.value.trim() : selectedOpt.getAttribute('data-title');
+      const categoryVal = isCustom ? "Bespoke Custom Order" : selectedOpt.getAttribute('data-category');
+
+      const itemCost = parseInt(manualItemPrice.value) || 0;
+      const deliveryCost = parseInt(manualDeliveryFee.value) || 0;
+      const grandTotal = itemCost + deliveryCost;
+
+      const orderData = {
+        orderId: orderIdVal,
+        status: statusVal,
+        customDeliveryDate: manualDeliveryDate.value.trim(),
+        item: itemTitle,
+        category: categoryVal,
+        customSelection: manualCustomSelection.value.trim() || 'Standard Direct Order',
+        specialNotes: 'Logged manually from admin desk',
+        itemPrice: `₹${itemCost}`,
+        deliveryFee: `₹${deliveryCost}`,
+        deliveryZone: deliveryCost === 0 ? 'Self Pickup / Waived' : (deliveryCost <= 50 ? 'Local' : 'Courier'),
+        price: `₹${grandTotal}`,
+        customerName: manualCustName.value.trim(),
+        phone: manualCustPhone.value.trim(),
+        address: manualCustAddress.value.trim(),
+        googleMapsLink: manualGoogleMapsLink.value.trim(),
+        payment: manualPaymentMethod.value,
+        orderDate: new Date().toLocaleDateString('en-IN')
+      };
+
+      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      orders.push(orderData);
+      localStorage.setItem('ciy_orders', JSON.stringify(orders));
+
+      syncOfflineOrderToCloud(orderData);
+
+      manualOrderModal.style.display = 'none';
+      manualOrderForm.reset();
+      loadAdminDashboard();
+
+      if (confirm(`✅ Order "${orderIdVal}" logged successfully!\n\nWould you like to send the customer their invoice receipt & live tracking link on WhatsApp right now?`)) {
+        pingCustomerWhatsApp(orders.length - 1);
+      }
+    });
+
+    // ==========================================
+    // ORDERS DASHBOARD & WHATSAPP PING DISPATCH
+    // ==========================================
+    const orderSearchInput = document.getElementById('orderSearchInput');
+    const searchMatchText = document.getElementById('searchMatchText');
+    const editOrderModal = document.getElementById('editOrderModal');
+    const editOrderForm = document.getElementById('editOrderForm');
+    const editOrderIndex = document.getElementById('editOrderIndex');
+    const editOrderId = document.getElementById('editOrderId');
+    const editOrderStatus = document.getElementById('editOrderStatus');
+    const editItemPrice = document.getElementById('editItemPrice');
+    const editDeliveryFee = document.getElementById('editDeliveryFee');
+    const editCustomDeliveryDate = document.getElementById('editCustomDeliveryDate');
+    const editCustName = document.getElementById('editCustName');
+    const editCustPhone = document.getElementById('editCustPhone');
+    const editCustSelection = document.getElementById('editCustSelection');
+    const editCustNotes = document.getElementById('editCustNotes');
+    const editCustAddress = document.getElementById('editCustAddress');
+    const editGoogleMapsLink = document.getElementById('editGoogleMapsLink');
+    const closeEditOrderModalBtn = document.getElementById('closeEditOrderModalBtn');
+
+    function getStatusBadge(status) {
+      const s = status || 'Pending';
+      if (s === 'Crafting') {
+        return `<span class="status-badge status-crafting">🟠 Crafting/Baking</span>`;
+      } else if (s === 'Shipped') {
+        return `<span class="status-badge status-shipped">🔵 Shipped</span>`;
+      } else if (s === 'Delivered') {
+        return `<span class="status-badge status-delivered">🟢 Delivered</span>`;
+      }
+      return `<span class="status-badge status-pending">🟡 Pending</span>`;
+    }
+
+    function loadAdminDashboard() {
+      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      const totalOrdersEl = document.getElementById('totalOrders');
+      const totalRevenueEl = document.getElementById('totalRevenue');
+
+      totalOrdersEl.textContent = orders.length;
+
+      let totalSum = 0;
+      orders.forEach(order => {
+        const num = parseInt((order.price || '0').replace(/[^0-9]/g, '')) || 0;
+        totalSum += num;
+      });
+      totalRevenueEl.textContent = '₹' + totalSum.toLocaleString('en-IN');
+
+      renderOrdersTableRows();
+    }
+
+    window.pingCustomerWhatsApp = function(orderIndex) {
+      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      const o = orders[orderIndex];
+      if (!o) return;
+
+      const phoneRaw = (o.phone || '').replace(/[^0-9]/g, '');
+      const phoneClean = phoneRaw.length === 10 ? '91' + phoneRaw : phoneRaw;
+
+      const origin = window.location.origin;
+      const pathname = window.location.pathname.replace('admin.html', 'index.html');
+      const trackingLink = `${origin}${pathname}?track=${o.orderId}`;
+
+      const status = o.status || 'Pending';
+      const deliverySchedule = o.customDeliveryDate || 'in 3 to 5 business days';
+
+      let msg = `Hi ${o.customerName}! ✨\n\n`;
+      msg += `Update from *VYORA* 🎨🍪 regarding your order (*${o.orderId}*):\n\n`;
+
+      if (status === 'Crafting') {
+        msg += `🟠 *Status: Crafting / Baking in Progress*\n`;
+        msg += `Your bespoke creation is currently being handcrafted in our studio according to your custom preferences!\n`;
+        msg += `📅 *Expected Dispatch:* ${deliverySchedule}\n\n`;
+      } else if (status === 'Shipped') {
+        msg += `🔵 *Status: Dispatched & Shipped!*\n`;
+        msg += `Your package has been carefully packed and handed over to courier transit.\n`;
+        msg += `🚚 *Expected Doorstep Delivery:* ${deliverySchedule}\n\n`;
+      } else if (status === 'Delivered') {
+        msg += `🟢 *Status: Delivered!*\n`;
+        msg += `Your order has arrived at your doorstep. We hope you love your creation! Please leave us a review.\n\n`;
+      } else {
+        msg += `🟡 *Status: Order Confirmed*\n`;
+        msg += `We have verified your order and queued it for preparation!\n\n`;
+      }
+
+      msg += `📌 *Item:* ${o.item}\n`;
+      msg += `💰 *Grand Total:* ${o.price}\n`;
+      msg += `💳 *Payment Mode:* ${o.payment}\n\n`;
+      msg += `📍 *Track live progress on your phone here:*\n${trackingLink}\n\n`;
+      msg += `Thank you for supporting handcrafted artistry! ❤️ — VYORA Studio`;
+
+      const encoded = encodeURIComponent(msg);
+      window.open(`https://wa.me/${phoneClean}?text=${encoded}`, '_blank');
+    };
+
+    function renderOrdersTableRows() {
+      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      const tbody = document.getElementById('ordersTbody');
+      const query = (orderSearchInput ? orderSearchInput.value : '').trim().toLowerCase();
+
+      tbody.innerHTML = '';
+
+      if (orders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:30px; color:#9ca3af;">No customer orders placed yet.</td></tr>`;
+        if (searchMatchText) searchMatchText.textContent = '';
+        return;
+      }
+
+      const indexedOrders = orders.map((order, originalIndex) => ({ order, originalIndex })).reverse();
+
+      const filtered = indexedOrders.filter(({ order }) => {
+        if (!query) return true;
+        const nameMatch = (order.customerName || '').toLowerCase().includes(query);
+        const phoneMatch = (order.phone || '').toLowerCase().includes(query);
+        const idMatch = (order.orderId || '').toLowerCase().includes(query);
+        const itemMatch = (order.item || '').toLowerCase().includes(query);
+        return nameMatch || phoneMatch || idMatch || itemMatch;
+      });
+
+      if (searchMatchText) {
+        if (query) {
+          searchMatchText.textContent = `Showing ${filtered.length} of ${orders.length} orders`;
+        } else {
+          searchMatchText.textContent = '';
+        }
+      }
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:30px; color:#9ca3af;">No orders found matching "${query}".</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(({ order, originalIndex }) => {
+        const tr = document.createElement('tr');
+        const deliveryDisplay = order.customDeliveryDate ? 
+          `<strong style="color:#059669;">${order.customDeliveryDate}</strong>` : 
+          `<span style="color:#9ca3af; font-size:0.8rem;">Auto-scheduled</span>`;
+
+        const mapBtn = order.googleMapsLink ? 
+          `<div style="margin-top:4px;"><a href="${order.googleMapsLink}" target="_blank" style="display:inline-flex; align-items:center; gap:3px; background:#e0f2fe; color:#0284c7; padding:2px 8px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:700;">📍 Open Maps Pin</a></div>` : '';
+
+        tr.innerHTML = `
+          <td>${order.orderDate || '-'}</td>
+          <td><strong>${order.orderId || '-'}</strong></td>
+          <td>${getStatusBadge(order.status)}</td>
+          <td>${deliveryDisplay}</td>
+          <td>${order.item || 'Item'}</td>
+          <td><strong style="color:#ff3366;">${order.customSelection || 'Standard'}</strong></td>
+          <td>${order.itemPrice || order.price || '-'}</td>
+          <td style="color:#0284c7; font-weight:600;">${order.deliveryFee || '₹0'}<br><small style="color:#6b7280;">${order.deliveryZone || ''}</small></td>
+          <td style="color:#059669; font-weight:700;">${order.price || '-'}</td>
+          <td><strong>${order.customerName || 'Customer'}</strong><br><a href="tel:${order.phone}" style="color:#ff3366; text-decoration:none;">📞 ${order.phone || '-'}</a></td>
+          <td style="max-width: 190px;">${order.address || '-'}${mapBtn}</td>
+          <td>
+            <div class="actions-cell">
+              <button class="btn-ping-whatsapp" onclick="pingCustomerWhatsApp(${originalIndex})">💬 Ping Customer</button>
+              <button class="btn-edit" onclick="openEditOrder(${originalIndex})">Edit Order</button>
+              <button class="btn-delete" onclick="deleteOrder(${originalIndex})">Delete</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    if (orderSearchInput) {
+      orderSearchInput.addEventListener('input', renderOrdersTableRows);
+    }
+
+    window.openEditOrder = function(index) {
+      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      const order = orders[index];
+      if (!order) return;
+
+      editOrderIndex.value = index;
+      editOrderId.value = order.orderId || '';
+      editOrderStatus.value = order.status || 'Pending';
+      editItemPrice.value = order.itemPrice || order.price || '';
+      editDeliveryFee.value = order.deliveryFee || '₹70';
+      editCustomDeliveryDate.value = order.customDeliveryDate || '';
+      editCustName.value = order.customerName || '';
+      editCustPhone.value = order.phone || '';
+      editCustSelection.value = order.customSelection || '';
+      editCustNotes.value = order.specialNotes || '';
+      editCustAddress.value = order.address || '';
+      editGoogleMapsLink.value = order.googleMapsLink || '';
+
+      editOrderModal.style.display = 'flex';
+    };
+
+    closeEditOrderModalBtn.addEventListener('click', () => { editOrderModal.style.display = 'none'; });
+
+    editOrderForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const index = parseInt(editOrderIndex.value);
+      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      if (index >= 0 && index < orders.length) {
+        const itemVal = parseInt(editItemPrice.value.replace(/[^0-9]/g, '')) || 0;
+        const deliveryVal = parseInt(editDeliveryFee.value.replace(/[^0-9]/g, '')) || 0;
+        const totalVal = itemVal + deliveryVal;
+
+        orders[index].status = editOrderStatus.value;
+        orders[index].itemPrice = `₹${itemVal}`;
+        orders[index].deliveryFee = `₹${deliveryVal}`;
+        orders[index].price = `₹${totalVal}`;
+        orders[index].customDeliveryDate = editCustomDeliveryDate.value.trim();
+        orders[index].customerName = editCustName.value.trim();
+        orders[index].phone = editCustPhone.value.trim();
+        orders[index].customSelection = editCustSelection.value.trim();
+        orders[index].specialNotes = editCustNotes.value.trim();
+        orders[index].address = editCustAddress.value.trim();
+        orders[index].googleMapsLink = editGoogleMapsLink.value.trim();
+
+        localStorage.setItem('ciy_orders', JSON.stringify(orders));
+        alert(`Order "${orders[index].orderId}" updated successfully! New Total: ₹${totalVal}`);
+        editOrderModal.style.display = 'none';
+        loadAdminDashboard();
+      }
+    });
+
+    window.deleteOrder = function(index) {
+      if (confirm("Remove this order record?")) {
+        const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+        orders.splice(index, 1);
+        localStorage.setItem('ciy_orders', JSON.stringify(orders));
+        loadAdminDashboard();
+      }
+    };
+
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      if (orders.length === 0) return alert("No orders to export!");
+
+      let csv = "data:text/csv;charset=utf-8,Order ID,Date,Status,Delivery Date,Item,Custom Choices,Item Cost,Delivery Fee,Zone,Grand Total,Customer,Phone,Address,Google Maps Pin\n";
+      orders.forEach(o => {
+        csv += `"${o.orderId || ''}","${o.orderDate || ''}","${o.status || 'Pending'}","${o.customDeliveryDate || 'Standard'}","${o.item || ''}","${o.customSelection || ''}","${o.itemPrice || ''}","${o.deliveryFee || ''}","${o.deliveryZone || ''}","${o.price || ''}","${o.customerName || ''}","${o.phone || ''}","${o.address || ''}","${o.googleMapsLink || ''}"\n`;
+      });
+      const link = document.createElement("a");
+      link.href = encodeURI(csv);
+      link.download = `vyora_orders_${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+    // ==========================================================================
+    // ⭐ ADMIN REVIEW MODERATION (DELETE BAD REVIEWS)
+    // ==========================================================================
+    const defaultStarterReviews = [
+      {
+        author: "Aruna V.",
+        stars: 5,
+        item: "Custom Walnut Cookies",
+        comment: "Ordered customized dark chocolate walnut cookies. Packed with whole nuts in every single bite, perfectly balanced sweetness!",
+        date: "2 days ago"
+      },
+      {
+        author: "Karthik R.",
+        stars: 5,
+        item: "Floral Fairy Bottle Art",
+        comment: "The warm fairy light floral bottle art arrived securely packed without a scratch. Looks magical on our nightstand!",
+        date: "1 week ago"
+      },
+      {
+        author: "Sneha P.",
+        stars: 5,
+        item: "Ocean Wave Resin Coasters",
+        comment: "The glassy 3D water finish on these coasters is stunning. Everyone who visits asks where I bought them.",
+        date: "2 weeks ago"
+      }
+    ];
+
+    function getAdminReviews() {
+      const stored = localStorage.getItem('vyora_customer_reviews');
+      if (!stored) {
+        localStorage.setItem('vyora_customer_reviews', JSON.stringify(defaultStarterReviews));
+        return defaultStarterReviews;
+      }
+      return JSON.parse(stored);
+    }
+
+    function loadAdminReviewsTable() {
+      const reviews = getAdminReviews();
+      const tbody = document.getElementById('reviewsAdminTbody');
+      const countEl = document.getElementById('totalReviewsCount');
+      if (countEl) countEl.textContent = reviews.length;
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+
+      if (reviews.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#9ca3af;">No customer reviews submitted yet.</td></tr>`;
+        return;
+      }
+
+      reviews.forEach((rev, index) => {
+        const tr = document.createElement('tr');
+        const starsHtml = '★'.repeat(rev.stars) + '☆'.repeat(5 - rev.stars);
+
+        tr.innerHTML = `
+          <td style="white-space:nowrap; font-size:0.82rem; color:#6b7280;">${rev.date || 'Recent'}</td>
+          <td><strong>${rev.author || 'Anonymous'}</strong></td>
+          <td style="color:#f59e0b; font-size:1.1rem; white-space:nowrap;">${starsHtml}</td>
+          <td><span style="background:#fff0f3; color:#ff3366; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:6px;">${rev.item || 'Storewide'}</span></td>
+          <td style="max-width:380px; font-size:0.88rem; color:#4a5568; line-height:1.5;">"${rev.comment}"</td>
+          <td>
+            <button class="btn-delete" onclick="deleteCustomerReview(${index})" style="background:#fee2e2; color:#dc2626; border:none; padding:7px 14px; border-radius:6px; font-weight:600; cursor:pointer;">
+              🗑️ Delete Review
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    window.deleteCustomerReview = function(index) {
+      const reviews = getAdminReviews();
+      const target = reviews[index];
+      if (!target) return;
+
+      if (confirm(`Are you sure you want to delete the review by "${target.author}"?\n\nComment: "${target.comment}"`)) {
+        reviews.splice(index, 1);
+        localStorage.setItem('vyora_customer_reviews', JSON.stringify(reviews));
+        alert("✅ Review deleted successfully!");
+        loadAdminReviewsTable();
+      }
+    };
+    // ==========================================================================
+    // 🎟️ ADMIN PROMO CODE & DISCOUNT CAMPAIGN LOGIC
+    // ==========================================================================
+    const adminPromoToggle = document.getElementById('adminPromoToggle');
+    const promoToggleSlider = document.getElementById('promoToggleSlider');
+    const promoToggleStatusText = document.getElementById('promoToggleStatusText');
+    const adminPromoForm = document.getElementById('adminPromoForm');
+    const adminPromoCode = document.getElementById('adminPromoCode');
+    const adminPromoType = document.getElementById('adminPromoType');
+    const adminPromoValue = document.getElementById('adminPromoValue');
+    const adminPromoLabel = document.getElementById('adminPromoLabel');
+
+    function getPromoSettings() {
+      const saved = localStorage.getItem('vyora_promo_settings');
+      if (saved) return JSON.parse(saved);
+      return {
+        enabled: true,
+        code: "VYORA10",
+        type: "percent",
+        value: 10,
+        label: "10% OFF on your entire order"
+      };
+    }
+
+    function savePromoSettings(settings) {
+      localStorage.setItem('vyora_promo_settings', JSON.stringify(settings));
+    }
+
+    function updatePromoToggleUI(isEnabled) {
+      if (adminPromoToggle) adminPromoToggle.checked = isEnabled;
+      if (promoToggleSlider) {
+        promoToggleSlider.style.backgroundColor = isEnabled ? '#059669' : '#cbd5e1';
+      }
+      if (promoToggleStatusText) {
+        promoToggleStatusText.textContent = isEnabled ? 'ACTIVE (ON)' : 'INACTIVE (OFF)';
+        promoToggleStatusText.style.color = isEnabled ? '#059669' : '#dc2626';
+      }
+      if (adminPromoForm) {
+        adminPromoForm.style.opacity = isEnabled ? '1' : '0.5';
+      }
+    }
+
+    function loadAdminPromoSettings() {
+      const settings = getPromoSettings();
+      updatePromoToggleUI(settings.enabled);
+
+      if (adminPromoCode) adminPromoCode.value = settings.code || "VYORA10";
+      if (adminPromoType) adminPromoType.value = settings.type || "percent";
+      if (adminPromoValue) adminPromoValue.value = settings.value || 10;
+      if (adminPromoLabel) adminPromoLabel.value = settings.label || "";
+    }
+
+    if (adminPromoToggle) {
+      adminPromoToggle.addEventListener('change', (e) => {
+        const settings = getPromoSettings();
+        settings.enabled = e.target.checked;
+        savePromoSettings(settings);
+        updatePromoToggleUI(settings.enabled);
+        alert(settings.enabled ? "✅ Promo codes are now ENABLED on storefront!" : "🛑 Promo codes are now DISABLED and hidden on storefront!");
+      });
+    }
+
+    if (adminPromoForm) {
+      adminPromoForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const settings = getPromoSettings();
+        const codeVal = adminPromoCode.value.trim().toUpperCase();
+        const typeVal = adminPromoType.value;
+        const numVal = parseInt(adminPromoValue.value) || 0;
+        let labelVal = adminPromoLabel.value.trim();
+
+        if (!labelVal) {
+          labelVal = typeVal === 'percent' ? `${numVal}% OFF on your entire order` : `Flat ₹${numVal} Instant Discount`;
+        }
+
+        settings.code = codeVal;
+        settings.type = typeVal;
+        settings.value = numVal;
+        settings.label = labelVal;
+
+        savePromoSettings(settings);
+        alert(`✅ Promo Code "${codeVal}" saved successfully!`);
+      });
+    }
+  </script>
+</body>
+</html>

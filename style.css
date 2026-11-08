@@ -1,0 +1,953 @@
+/* ==========================================================================
+   CIY STUDIO - MODERN RESPONSIVE STOREFRONT STYLESHEET
+   ========================================================================== */
+
+:root {
+  --primary: #ff3366;
+  --primary-hover: #e02456;
+  --primary-light: #fff0f3;
+  --secondary: #22223b;
+  --accent: #ff758c;
+  --bg-light: #fbfbfd;
+  --card-bg: #ffffff;
+  --text-main: #2d3748;
+  --text-muted: #718096;
+  --border-color: #edf2f7;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-md: 0 10px 25px rgba(0,0,0,0.07);
+  --shadow-lg: 0 18px 40px rgba(255, 51, 102, 0.15);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--bg-light);
+  color: var(--text-main);
+  overflow-x: hidden;
+  padding-bottom: 70px; /* Room for mobile bottom bar */
+}
+
+/* ==========================================================================
+   HEADER & BRAND LOGO (BIG LOGO ON TOP, STACKED DUAL-COLOR TITLE UNDER)
+   ========================================================================== */
+.main-header {
+  position: sticky;
+  top: 0;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Top Left Brand Logo Container */
+.brand-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  cursor: pointer;
+  user-select: none;
+  gap: 4px;
+}
+
+/* Large, Crisp Square-Rounded Logo */
+.brand-logo-img {
+  width: 65px;
+  height: 65px;
+  border-radius: 14px;
+  object-fit: cover;
+  box-shadow: 0 4px 14px rgba(255, 51, 102, 0.28);
+  border: 1.5px solid #ffe4ea;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.brand-logo:hover .brand-logo-img {
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(255, 51, 102, 0.38);
+}
+
+/* Stacked Brand Text */
+.brand-text-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+}
+
+/* "CIY" - Bigger, Bold & Vibrant Berry-Rose */
+.brand-title-large {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.85rem;
+  font-weight: 900;
+  color: #ff3366; /* Vibrant Pink */
+  letter-spacing: 1.5px;
+  margin: 0;
+}
+
+/* "CHOICE IS YOURS" - Refined & Deep Obsidian Navy */
+.brand-tagline-sub {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #22223b; /* Deep Navy */
+  letter-spacing: 2px;
+  margin-top: 1px;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--secondary);
+  font-size: 0.92rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover {
+  color: var(--primary);
+}
+
+/* Mobile Hamburger Button */
+.mobile-nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.7rem;
+  color: var(--secondary);
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* Slide-out Mobile Menu */
+.mobile-nav-drawer {
+  display: none;
+  flex-direction: column;
+  background: #ffffff;
+  border-top: 1px solid var(--border-color);
+  padding: 16px 20px;
+  gap: 14px;
+}
+
+.mobile-nav-drawer.active {
+  display: flex;
+}
+
+.mobile-nav-drawer a {
+  text-decoration: none;
+  color: var(--secondary);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 8px 0;
+  border-bottom: 1px solid #f7fafc;
+}
+
+/* Mobile Bottom Navigation Bar */
+.mobile-bottom-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  box-shadow: 0 -4px 15px rgba(0,0,0,0.06);
+  z-index: 1000;
+  border-top: 1px solid var(--border-color);
+  padding: 8px 16px;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.mobile-bar-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-decoration: none;
+  color: var(--secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.mobile-bar-btn span {
+  font-size: 1.25rem;
+}
+
+/* ==========================================================================
+   HERO SECTION
+   ========================================================================== */
+.hero-section {
+  position: relative;
+  padding: 50px 20px 35px;
+  text-align: center;
+  background: linear-gradient(180deg, #fff8f9 0%, var(--bg-light) 100%);
+}
+
+.hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero-badge {
+  display: inline-block;
+  background: #ffffff;
+  color: var(--primary);
+  border: 1px solid #fed7aa;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.hero-section h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
+  color: var(--secondary);
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary), #ff758c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.hero-cta-group {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 26px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(255, 51, 102, 0.3);
+  transition: transform 0.2s;
+  display: inline-block;
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: var(--secondary);
+  border: 1.5px solid var(--border-color);
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.hero-highlights {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.highlight-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  padding: 10px 16px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+}
+
+.highlight-icon {
+  font-size: 1.5rem;
+}
+
+.highlight-item strong {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--secondary);
+}
+
+.highlight-item p {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   VISUAL CATEGORY STORY CIRCLES
+   ========================================================================== */
+.categories-showcase-section {
+  max-width: 1200px;
+  margin: 10px auto 25px;
+  padding: 0 20px;
+}
+
+.categories-showcase-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.categories-showcase-title h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.45rem;
+  color: var(--secondary);
+}
+
+.category-bubbles-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scrollbar-width: thin;
+}
+
+.category-bubbles-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+.category-bubbles-scroll::-webkit-scrollbar-thumb {
+  background: #ffd6e0;
+  border-radius: 4px;
+}
+
+.category-bubble-card {
+  flex: 0 0 auto;
+  width: 105px;
+  text-align: center;
+  cursor: pointer;
+  background: none;
+  border: none;
+  outline: none;
+}
+
+.bubble-avatar {
+  width: 78px;
+  height: 78px;
+  margin: 0 auto 8px;
+  border-radius: 50%;
+  padding: 3px;
+  background: #ffffff;
+  border: 2px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, border-color 0.2s;
+  overflow: hidden;
+}
+
+.category-bubble-card.active .bubble-avatar {
+  border: 2.5px solid var(--primary);
+  box-shadow: 0 4px 14px rgba(255, 51, 102, 0.35);
+  transform: scale(1.05);
+}
+
+.bubble-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.bubble-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--secondary);
+  display: block;
+}
+
+.category-bubble-card.active .bubble-label {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   STORE CATALOG & CARDS
+   ========================================================================== */
+.store-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px 20px 40px;
+}
+
+.section-header {
+  margin-bottom: 20px;
+}
+
+.sub-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--primary);
+  text-transform: uppercase;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.art-card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.art-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.img-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 100%;
+  background: #f7fafc;
+  cursor: pointer;
+}
+
+.img-wrapper img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(17, 24, 39, 0.8);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+  z-index: 2;
+}
+
+.art-info {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.category-labels {
+  display: flex;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+.art-info h3 {
+  font-size: 1.05rem;
+  color: var(--secondary);
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.price-box {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: auto;
+  margin-bottom: 14px;
+}
+
+.discount-price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #059669;
+}
+
+.original-price {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.discount-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.view-details-btn {
+  width: 100%;
+  padding: 11px;
+  background: #fdf2f4;
+  color: var(--primary);
+  border: 1.5px solid #ffccd5;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-details-btn:hover {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   INSTAGRAM SHOWCASE & FLOATING WHATSAPP
+   ========================================================================== */
+.instagram-showcase-section {
+  max-width: 1200px;
+  margin: 40px auto 20px;
+  padding: 0 20px;
+}
+
+.insta-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.insta-follow-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  color: #ffffff;
+  padding: 9px 18px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(220, 39, 67, 0.25);
+  transition: transform 0.2s;
+}
+
+.insta-follow-btn:hover {
+  transform: translateY(-2px);
+}
+
+.insta-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.insta-item {
+  position: relative;
+  width: 100%;
+  padding-top: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  display: block;
+  box-shadow: var(--shadow-sm);
+  background: #f3f4f6;
+}
+
+.insta-item img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.insta-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.insta-item:hover img {
+  transform: scale(1.06);
+}
+
+.insta-item:hover .insta-overlay {
+  opacity: 1;
+}
+
+/* Floating WhatsApp Button */
+.floating-whatsapp-bubble {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background: #25d366;
+  color: #ffffff;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+  z-index: 999;
+  text-decoration: none;
+  font-size: 2rem;
+  transition: transform 0.2s;
+}
+
+.floating-whatsapp-bubble:hover {
+  transform: scale(1.08);
+}
+
+/* ==========================================================================
+   MODAL WINDOWS & QUICK-VIEW
+   ========================================================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.65);
+  backdrop-filter: blur(5px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-box {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 850px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 24px;
+  box-shadow: var(--shadow-lg);
+}
+
+.close-btn {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: #f3f4f6;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4b5563;
+  z-index: 10;
+}
+
+.product-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.main-image-container {
+  width: 100%;
+  height: 320px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f7fafc;
+}
+
+.main-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbnail-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  overflow-x: auto;
+}
+
+.thumb-img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1.5px solid var(--border-color);
+  cursor: pointer;
+}
+
+.thumb-img.active {
+  border-color: var(--primary);
+}
+
+.custom-options-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.custom-chip-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  background: #f8fafc;
+  border: 1.5px solid var(--border-color);
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   MOBILE SCREEN RESPONSIVENESS
+   ========================================================================== */
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+
+  .mobile-nav-toggle {
+    display: block;
+  }
+
+  .mobile-bottom-bar {
+    display: flex;
+  }
+
+  /* Responsive Brand Logo on Mobile */
+  .brand-logo-img {
+    width: 52px;
+    height: 52px;
+  }
+
+  .brand-title-large {
+    font-size: 1.5rem;
+  }
+
+  .brand-tagline-sub {
+    font-size: 0.6rem;
+    letter-spacing: 1.5px;
+  }
+
+  .hero-section {
+    padding: 35px 16px 25px;
+  }
+
+  .hero-section h1 {
+    font-size: 2rem;
+  }
+
+  .gallery-grid {
+    grid-template-columns: 1fr 1fr; /* 2 items per row */
+    gap: 12px;
+  }
+
+  .art-info {
+    padding: 10px;
+  }
+
+  .art-info h3 {
+    font-size: 0.86rem;
+    margin-bottom: 6px;
+  }
+
+  .discount-price {
+    font-size: 1.05rem;
+  }
+
+  .view-details-btn {
+    padding: 8px;
+    font-size: 0.78rem;
+  }
+
+  .product-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .main-image-container {
+    height: 230px;
+  }
+
+  .insta-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .floating-whatsapp-bubble {
+    bottom: 74px;
+    right: 16px;
+    width: 52px;
+    height: 52px;
+    font-size: 1.75rem;
+  }
+}
+/* ==========================================================================
+   FULLSCREEN LOGO ENLARGE OVERLAY
+   ========================================================================== */
+.logo-fullscreen-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.88);
+  backdrop-filter: blur(8px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10005;
+  cursor: pointer;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.logo-fullscreen-overlay.active {
+  display: flex;
+}
+
+.logo-fullscreen-card {
+  text-align: center;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  max-width: 90vw;
+  max-height: 85vh;
+  transform: scale(0.9);
+  animation: popIn 0.25s ease-out forwards;
+}
+
+.logo-fullscreen-img {
+  width: 260px;
+  height: 260px;
+  object-fit: cover;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(255, 51, 102, 0.25);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes popIn {
+  to { transform: scale(1); }
+}
+
+/* ==========================================================================
+   COMPACT MOBILE HERO LAYOUT (SIDE-BY-SIDE BUTTONS & 3-COLUMN HIGHLIGHTS)
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Side-by-side: "Shop All Collections" & "Track Order" */
+  .hero-cta-group {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 420px !important;
+    margin: 0 auto 20px !important;
+  }
+
+  .hero-cta-group .btn-primary,
+  .hero-cta-group .btn-secondary {
+    width: 100% !important;
+    padding: 11px 8px !important;
+    font-size: 0.82rem !important;
+    text-align: center !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    border-radius: 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 3-column side-by-side: "Artisan Crafts", "Fresh Cookies", & "Chocolates" */
+  .hero-highlights {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 480px !important;
+    margin: 0 auto !important;
+  }
+
+  .highlight-item {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: 10px 4px !important;
+    border-radius: 12px !important;
+    gap: 4px !important;
+  }
+
+  .highlight-icon {
+    font-size: 1.35rem !important;
+  }
+
+  .highlight-item strong {
+    font-size: 0.72rem !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+  }
+
+  .highlight-item p {
+    font-size: 0.62rem !important;
+    line-height: 1.2 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+}

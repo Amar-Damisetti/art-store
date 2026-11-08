@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="google-site-verification" content="j5eMjU419KtIliwxlv14XcylXx3z-jyO9CX683jRqtI" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>VYORA — SHOP-CREATE-CELEBRATE | Bespoke Art & Handmade Delights</title>
+ 
+  <!-- WhatsApp & Social Media Preview Cards -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="VYORA — Handcrafted Resin Art & Gourmet Bakery" />
+  <meta property="og:description" content="Custom glowing bottle art, ocean resin clocks, freshly baked cookies with customer-selected nuts, and artisanal chocolates." />
+  <meta property="og:image" content="https://YOUR-NETLIFY-NAME.netlify.app/images/logo1.png" />
+  <meta property="og:url" content="https://YOUR-NETLIFY-NAME.netlify.app/" />
+
+  <!-- Twitter / X Preview Cards -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="VYORA — Handcrafted Art & Fresh Bakes" />
+  <meta name="twitter:description" content="Custom glowing bottle art, ocean resin clocks, and fresh cookies with your choice of nuts." />
+  <meta name="twitter:image" content="https://YOUR-NETLIFY-NAME.netlify.app/images/logo1.png" />
+ 
+  <!-- PWA Manifest & App Metas -->
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#ff3366" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="VYORA" />
+
+  <!-- App Icons for Android, iOS & Browser Tab -->
+  <link rel="icon" type="image/png" sizes="192x192" href="images/logo1.png" />
+  <link rel="shortcut icon" type="image/png" href="images/logo1.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="images/logo1.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;0,900;1,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+
+<!-- Structured Schema for Google Search -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "OnlineStore",
+    "name": "VYORA",
+    "alternateName": "VYORA Studio",
+    "description": "Bespoke handcrafted bottle art, crystal resin decor, fresh custom-baked cookies, and artisanal chocolates.",
+    "url": "https://vyora-scc.netlify.app/",
+    "logo": "https://vyora-scc.netlify.app/images/logo1.png",
+    "priceRange": "₹₹",
+    "paymentAccepted": "Cash on Delivery, UPI",
+    "currenciesAccepted": "INR"
+  }
+  </script>
+</head>
+<body>
+
+  <!-- PWA Install Popup Banner -->
+  <div id="pwaInstallBanner" style="display: none; position: fixed; top: 12px; left: 16px; right: 16px; background: #ffffff; border: 1.5px solid #ffccd5; border-radius: 14px; padding: 12px 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); z-index: 10001; align-items: center; justify-content: space-between; gap: 10px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <img src="images/logo1.png" alt="VYORA App" style="width: 44px; height: 44px; border-radius: 10px; object-fit: cover; border: 1px solid #ffd6e0; display: block;" onerror="this.src='https://placehold.co/100x100?text=VYORA';" />
+      <div>
+        <strong style="font-size: 0.88rem; color: #22223b; display: block; line-height: 1.2;">Install VYORA App</strong>
+        <span style="font-size: 0.74rem; color: #718096;">Quick orders & instant tracking</span>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <button type="button" id="btnInstallPwa" style="background: linear-gradient(135deg, #ff3366, #ff758c); color: #fff; border: none; padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+        Install
+      </button>
+      <button type="button" id="btnClosePwaBanner" style="background: none; border: none; color: #9ca3af; font-size: 1.2rem; cursor: pointer; padding: 4px;">&times;</button>
+    </div>
+  </div>
+
+  <!-- Top Sticky Header -->
+  <header class="main-header">
+    <div class="header-container">
+      <!-- Top Left Brand Block: Big Logo with Dual-Colored Stacked Text Underneath -->
+      <div class="brand-logo" title="VYORA — SHOP-CREATE-CELEBRATE">
+        <img src="images/logo1.png" alt="VYORA Logo" class="brand-logo-img" id="brandLogoThumb" onerror="this.style.display='none'" />
+        <div class="brand-text-stack">
+          <span class="brand-title-large">VYORA</span>
+          <span class="brand-tagline-sub">SHOP-CREATE-CELEBRATE</span>
+        </div>
+      </div>
+
+      <!-- Desktop Navigation Bar -->
+      <nav class="nav-links">
+        <a href="#home">Home</a>
+        <a href="#categoriesSection">Explore</a>
+        <a href="#store">Collection</a>
+        <a href="#customSection">Custom Studio</a>
+        <a href="#instagramSection">Instagram</a>
+        <a href="#reviews">Reviews</a>
+        <a href="javascript:void(0)" id="openTrackModalBtn" style="color: #ff3366; font-weight: 700;">📍 Track Order</a>
+      </nav>
+
+      <!-- Mobile Hamburger Button -->
+      <button type="button" class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle menu">
+        ☰
+      </button>
+    </div>
+
+    <!-- Mobile Dropdown Drawer -->
+    <div class="mobile-nav-drawer" id="mobileNavDrawer">
+      <a href="#home" class="mobile-nav-item">🏠 Home</a>
+      <a href="#categoriesSection" class="mobile-nav-item">✨ Browse Departments</a>
+      <a href="#store" class="mobile-nav-item">🛍️ Full Collection</a>
+      <a href="#customSection" class="mobile-nav-item">🎨 Custom Studio</a>
+      <a href="#instagramSection" class="mobile-nav-item">📸 Instagram Reels & Crafts</a>
+      <a href="#reviews" class="mobile-nav-item">⭐ Customer Reviews</a>
+      <a href="javascript:void(0)" id="mobileTrackOrderLink" class="mobile-nav-item" style="color: #ff3366; font-weight: 700;">📍 Track Existing Order</a>
+    </div>
+  </header>
+
+  <!-- Fullscreen Logo Splash Preview Overlay -->
+  <div id="logoFullscreenModal" class="logo-fullscreen-overlay">
+    <div class="logo-fullscreen-card">
+      <img src="images/logo1.png" alt="VYORA Full Logo" class="logo-fullscreen-img" />
+      <h2 style="font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #ff3366; margin-top: 14px; margin-bottom: 2px;">VYORA</h2>
+      <p style="font-size: 0.8rem; font-weight: 700; color: #22223b; letter-spacing: 2px;">SHOP-CREATE-CELEBRATE</p>
+      <span style="font-size: 0.75rem; color: #718096; margin-top: 10px; display: block;">Tap anywhere to return</span>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Sticky Quick-Action Bar -->
+  <nav class="mobile-bottom-bar">
+    <a href="#home" class="mobile-bar-btn">
+      <span>🏠</span>
+      Home
+    </a>
+    <a href="#categoriesSection" class="mobile-bar-btn">
+      <span>🏷️</span>
+      Categories
+    </a>
+    <a href="#store" class="mobile-bar-btn">
+      <span>🛍️</span>
+      Shop
+    </a>
+    <a href="javascript:void(0)" id="mobileBottomTrackBtn" class="mobile-bar-btn" style="color:#ff3366;">
+      <span>📍</span>
+      Track
+    </a>
+  </nav>
+
+  <!-- Floating WhatsApp Quick-Chat Bubble -->
+  <a href="https://wa.me/919491396383?text=Hi%20VYORA!%20I%20am%20browsing%20your%20website%20and%20had%20a%20few%20questions%20about%20a%20custom%20order." 
+     class="floating-whatsapp-bubble" 
+     id="floatingWhatsAppBtn" 
+     target="_blank" 
+     rel="noopener noreferrer" 
+     title="Chat directly on WhatsApp">
+    💬
+  </a>
+
+  <!-- Hero Section -->
+  <section class="hero-section" id="home">
+    <div class="hero-content">
+      <span class="hero-badge">✨ 100% Handcrafted & Tailored to You</span>
+      <h1>Your Vision, Your Taste.<br><span class="gradient-text">Crafted Just For You.</span></h1>
+      <p class="hero-subtitle">
+        Custom glowing bottle art, glass resin coasters, fresh cookies with customer-selected nuts, and artisanal chocolates.
+      </p>
+
+      <div class="hero-cta-group">
+        <a href="#store" class="btn-primary">Shop All Collections</a>
+        <a href="javascript:void(0)" class="btn-secondary" id="heroTrackBtn">📦 Track Order</a>
+      </div>
+
+      <div class="hero-highlights">
+        <div class="highlight-item">
+          <span class="highlight-icon">🎨</span>
+          <div>
+            <strong>Artisan Crafts</strong>
+            <p>Bottle & Resin Decor</p>
+          </div>
+        </div>
+        <div class="highlight-item">
+          <span class="highlight-icon">🍪</span>
+          <div>
+            <strong>Fresh Cookies</strong>
+            <p>Customer-selected nuts</p>
+          </div>
+        </div>
+        <div class="highlight-item">
+          <span class="highlight-icon">🍫</span>
+          <div>
+            <strong>Chocolates</strong>
+            <p>Custom shapes & nuts</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visual Category Department Circles -->
+  <section class="categories-showcase-section" id="categoriesSection">
+    <div class="categories-showcase-title">
+      <h3>Explore Categories</h3>
+      <span style="font-size:0.8rem; color:#ff3366; font-weight:600;">Tap to filter</span>
+    </div>
+
+    <div class="category-bubbles-scroll" id="categoryBubblesList">
+      <button type="button" class="category-bubble-card active" data-category-filter="all">
+        <div class="bubble-avatar">
+          <img src="images/logo1.png" alt="All Products" onerror="this.src='https://placehold.co/150x150?text=VYORA'" />
+        </div>
+        <span class="bubble-label">All Creations</span>
+      </button>
+
+      <button type="button" class="category-bubble-card" data-category-filter="bottle_art">
+        <div class="bubble-avatar">
+          <img src="images/bottle1.jpg" alt="Bottle Art" onerror="this.src='https://images.unsplash.com/photo-1543257580-7269da773bf5?auto=format&fit=crop&w=150&q=80'" />
+        </div>
+        <span class="bubble-label">Bottle Art</span>
+      </button>
+
+      <button type="button" class="category-bubble-card" data-category-filter="resin_art">
+        <div class="bubble-avatar">
+          <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=150&q=80" alt="Resin Art" />
+        </div>
+        <span class="bubble-label">Resin Art</span>
+      </button>
+
+      <button type="button" class="category-bubble-card" data-category-filter="cookies">
+        <div class="bubble-avatar">
+          <img src="https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=150&q=80" alt="Fresh Baked Cookies" />
+        </div>
+        <span class="bubble-label">Cookies</span>
+      </button>
+
+      <button type="button" class="category-bubble-card" data-category-filter="chocolates">
+        <div class="bubble-avatar">
+          <img src="https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=150&q=80" alt="Handmade Chocolates" />
+        </div>
+        <span class="bubble-label">Chocolates</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Main Storefront Catalog Section -->
+  <section class="store-section" id="store">
+    <div class="section-header">
+      <span class="sub-title">CURATED ARTWORKS & TREATS</span>
+      <h2 id="currentCategoryHeading" style="font-family:'Playfair Display',serif; font-size:1.6rem; color:#22223b;">All Handcrafted Creations</h2>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="gallery-grid" id="productGrid"></div>
+  </section>
+
+  <!-- Customization Feature Banner -->
+  <section class="custom-spotlight" id="customSection" style="max-width:1200px; margin:20px auto; padding:0 20px;">
+    <div style="background:#ffffff; border:1px solid #ffd6e0; border-radius:18px; padding:24px; box-shadow:0 10px 25px rgba(0,0,0,0.04);">
+      <span style="font-size:0.75rem; font-weight:700; color:#ff3366; text-transform:uppercase; letter-spacing:1.5px;">VYORA CUSTOM STUDIO</span>
+      <h2 style="font-family:'Playfair Display',serif; font-size:1.6rem; color:#22223b; margin:6px 0 10px;">Build Your Custom Cookie Box or Bespoke Resin Decor</h2>
+      <p style="font-size:0.9rem; color:#718096; line-height:1.6; margin-bottom:14px;">
+        Pick your favorite nuts (Almonds, Cashews, Walnuts, Pistachios, Choco-chips), or specify your resin frame colors and warm LED lighting effects.
+      </p>
+      <a href="#store" class="btn-primary" style="display:inline-block; font-size:0.88rem;">Pick An Item to Customize</a>
+    </div>
+  </section>
+
+  <!-- Instagram Showcase Strip -->
+  <section class="instagram-showcase-section" id="instagramSection">
+    <div class="insta-header-row">
+      <div>
+        <span class="sub-title">BEHIND THE SCENES</span>
+        <h2 style="font-family:'Playfair Display',serif; font-size:1.6rem; color:#22223b; margin-top:2px;">Follow Us On Instagram</h2>
+      </div>
+      <a href="https://instagram.com/vyora_scc" target="_blank" rel="noopener noreferrer" class="insta-follow-btn">
+        📸 Follow @vyora_scc
+      </a>
+    </div>
+
+    <div class="insta-grid">
+      <a href="https://instagram.com/vyora_scc" target="_blank" rel="noopener noreferrer" class="insta-item">
+        <img src="images/bottle1.jpg" alt="Floral Fairy Bottle Art Process" onerror="this.src='https://images.unsplash.com/photo-1543257580-7269da773bf5?auto=format&fit=crop&w=600&q=80'" />
+        <div class="insta-overlay">
+          <span>🎬 Watch Reel</span>
+        </div>
+      </a>
+
+      <a href="https://instagram.com/vyora_scc" target="_blank" rel="noopener noreferrer" class="insta-item">
+        <img src="https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=600&q=80" alt="Fresh Butter Cookies with Nuts" />
+        <div class="insta-overlay">
+          <span>🍪 Fresh Batch</span>
+        </div>
+      </a>
+
+      <a href="https://instagram.com/vyora_scc" target="_blank" rel="noopener noreferrer" class="insta-item">
+        <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=600&q=80" alt="Resin Art Process" />
+        <div class="insta-overlay">
+          <span>🌊 Studio Pour</span>
+        </div>
+      </a>
+
+      <a href="https://instagram.com/vyora_scc" target="_blank" rel="noopener noreferrer" class="insta-item">
+        <img src="https://images.unsplash.com/photo-1548907040-4baa42d10919?auto=format&fit=crop&w=600&q=80" alt="Artisan Chocolates Packaging" />
+        <div class="insta-overlay">
+          <span>🍫 Handcrafted</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Customer Reviews Section with Interactive Submission Form -->
+  <section class="reviews-section" id="reviews" style="max-width:1200px; margin:40px auto; padding:0 20px;">
+    <div class="section-header text-center" style="text-align: center; margin-bottom: 24px;">
+      <span class="sub-title" style="font-size: 0.78rem; font-weight: 700; letter-spacing: 2px; color: #ff3366; text-transform: uppercase;">LOVED BY OUR PATRONS</span>
+      <h2 style="font-family:'Playfair Display',serif; font-size:1.8rem; color:#22223b; margin-top:4px;">Customer Reviews & Stories</h2>
+      <p style="color: #718096; font-size: 0.88rem; max-width: 500px; margin: 4px auto 0;">Real experiences from patrons who customized their art and treats with us.</p>
+    </div>
+
+    <!-- Review Submission Trigger Card -->
+    <div style="background: #ffffff; border: 1.5px dashed #ffd6e0; border-radius: 16px; padding: 20px; max-width: 600px; margin: 0 auto 30px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+      <h3 style="font-size: 1.1rem; color: #22223b; margin-bottom: 6px;">Bought from VYORA recently?</h3>
+      <p style="font-size: 0.82rem; color: #718096; margin-bottom: 14px;">Share your experience to help other art and dessert lovers craft their custom orders.</p>
+      <button type="button" id="toggleReviewFormBtn" style="background: linear-gradient(135deg, #ff3366, #ff758c); color: #fff; border: none; padding: 10px 22px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; cursor: pointer; box-shadow: 0 4px 12px rgba(255, 51, 102, 0.25);">
+        ✍️ Write a Review
+      </button>
+
+      <!-- Expandable Review Form -->
+      <form id="reviewSubmissionForm" style="display: none; text-align: left; margin-top: 18px; border-top: 1px solid #f3f4f6; padding-top: 16px;">
+        <div style="margin-bottom: 12px;">
+          <label style="font-size: 0.8rem; font-weight: 600; color: #4b5563; display: block; margin-bottom: 4px;">Your Rating *</label>
+          <div id="starRatingPicker" style="display: flex; gap: 8px; font-size: 1.6rem; cursor: pointer; color: #d1d5db; user-select: none;">
+            <span data-star="1">★</span>
+            <span data-star="2">★</span>
+            <span data-star="3">★</span>
+            <span data-star="4">★</span>
+            <span data-star="5" style="color: #f59e0b;">★</span>
+          </div>
+          <input type="hidden" id="reviewStarValue" value="5" />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+          <div>
+            <label style="font-size: 0.8rem; font-weight: 600; color: #4b5563; display: block; margin-bottom: 4px;">Your Name *</label>
+            <input type="text" id="reviewAuthor" placeholder="e.g. Ananya M." required style="width: 100%; padding: 9px 12px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 0.88rem; outline: none;" />
+          </div>
+          <div>
+            <label style="font-size: 0.8rem; font-weight: 600; color: #4b5563; display: block; margin-bottom: 4px;">Item Purchased</label>
+            <input type="text" id="reviewItemPurchased" placeholder="e.g. Floral Bottle Art / Cookies" style="width: 100%; padding: 9px 12px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 0.88rem; outline: none;" />
+          </div>
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label style="font-size: 0.8rem; font-weight: 600; color: #4b5563; display: block; margin-bottom: 4px;">Your Review / Testimonial *</label>
+          <textarea id="reviewComment" rows="3" placeholder="Tell us how your custom art looks or how the cookies tasted..." required style="width: 100%; padding: 10px 12px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 0.88rem; outline: none;"></textarea>
+        </div>
+
+        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+          <button type="button" id="cancelReviewBtn" style="background: #f3f4f6; color: #4b5563; border: none; padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">Cancel</button>
+          <button type="submit" style="background: #059669; color: #fff; border: none; padding: 8px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer;">Post Review ⭐</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Dynamic Reviews Grid Container -->
+    <div id="reviewsDisplayGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;"></div>
+  </section>
+
+  <!-- Site Footer with Logo -->
+  <footer style="background:#ffffff; border-top:1px solid #edf2f7; padding:30px 20px; text-align:center; color:#718096; font-size:0.84rem;">
+    <img src="images/logo1.png" alt="VYORA" onerror="this.style.display='none'" style="width: 44px; height: 44px; border-radius: 10px; margin: 0 auto 10px; display: block;" />
+    <p><strong>VYORA — SHOP-CREATE-CELEBRATE</strong> | Bespoke Art & Handmade Delights</p>
+    <p style="margin-top:6px;">&copy; 2026 VYORA. All Rights Reserved.</p>
+  </footer>
+
+  <!-- Product Details Quick-View Modal -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal-box">
+      <button type="button" class="close-btn" id="closeProductModal">&times;</button>
+      
+      <div class="product-layout">
+        <div class="product-media">
+          <div class="main-image-container" id="mainMediaBox">
+            <img id="detailMainImg" src="" alt="Main View" />
+          </div>
+          <div class="thumbnail-row" id="thumbnailRow"></div>
+        </div>
+
+        <div class="product-summary">
+          <div style="font-size:0.75rem; font-weight:700; color:#ff3366; text-transform:uppercase; margin-bottom:4px;" id="detailCategory">Category</div>
+          <h2 id="detailTitle" style="font-family:'Playfair Display',serif; font-size:1.5rem; color:#22223b; line-height:1.3; margin-bottom:8px;">Product Title</h2>
+
+          <div style="display:flex; align-items:baseline; gap:8px; margin-bottom:12px;">
+            <span class="discount-price" id="detailDiscountPrice">₹0</span>
+            <span class="original-price" id="detailOriginalPrice">₹0</span>
+            <span class="discount-badge" id="detailBadge">0% OFF</span>
+          </div>
+
+          <p id="detailDesc" style="font-size:0.88rem; color:#718096; line-height:1.6; margin-bottom:16px;"></p>
+
+          <div id="customizationSection">
+            <div id="nutToppingWrapper" style="display:none; margin-bottom:12px;">
+              <label style="font-size:0.82rem; font-weight:700; color:#2d3748;">🥜 Select Your Nuts & Toppings:</label>
+              <div class="custom-options-grid" id="customOptionsContainer"></div>
+            </div>
+
+            <div id="artCustomWrapper" style="display:none; margin-bottom:12px;">
+              <label style="font-size:0.82rem; font-weight:700; color:#2d3748;">💡 Select LED Fairy Light Glow:</label>
+              <div class="custom-options-grid">
+                <label class="custom-chip-label">
+                  <input type="radio" name="artLightGlow" value="Warm Golden Yellow" checked />
+                  <span>🌟 Warm Golden</span>
+                </label>
+                <label class="custom-chip-label">
+                  <input type="radio" name="artLightGlow" value="Multicolor Fairy Glow" />
+                  <span>🌈 Multicolor</span>
+                </label>
+              </div>
+            </div>
+
+            <div style="margin-bottom:14px;">
+              <label style="font-size:0.82rem; font-weight:700; color:#2d3748;">✍️ Custom Note / Name on Art:</label>
+              <input type="text" id="customPersonalNote" placeholder="e.g. 'Less sweet' or 'Name: Priya'" style="width:100%; padding:10px 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:0.9rem; margin-top:4px;" />
+            </div>
+
+            <div style="background:#fff0f3; padding:10px 12px; border-radius:10px; font-size:0.8rem; color:#ff3366; margin-bottom:16px;">
+              <strong>Custom Blueprint:</strong>
+              <div id="liveSummaryText">Standard Configuration</div>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <button type="button" class="btn-primary" id="openCheckoutModalBtn" style="width:100%; padding:14px; border:none; cursor:pointer;">
+              ⚡ Buy Now (Enter Address & Payment)
+            </button>
+            <button type="button" id="whatsappChatOnlyBtn" style="width:100%; padding:11px; font-size:0.88rem; font-weight:600; background:#f0fdf4; color:#15803d; border:1.5px solid #bbf7d0; border-radius:12px; cursor:pointer;">
+              💬 Chat on WhatsApp First
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkout Modal with GPS Current Location Button -->
+  <div class="modal-overlay" id="orderModal">
+    <div class="modal-box checkout-box" style="max-width: 540px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 22px; border-radius: 18px; background: #fff;">
+      <button type="button" class="close-btn" id="closeModal">&times;</button>
+      
+      <div id="checkoutFormView">
+        <div style="border-bottom: 2px solid #f3f4f6; padding-bottom: 12px; margin-bottom: 16px;">
+          <span style="font-size: 0.75rem; font-weight: 700; color: #ff3366; text-transform: uppercase;">SECURE CHECKOUT</span>
+          <h3 style="font-family: 'Playfair Display', serif; font-size: 1.45rem; color: #22223b; margin-top: 2px;">Delivery & Order Summary</h3>
+        </div>
+        
+        <div style="background: #fff8f9; border: 1.5px solid #ffccd5; padding: 12px 14px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h4 id="modalArtTitle" style="font-size: 0.95rem; color: #22223b; margin-bottom: 2px;">Product Title</h4>
+            <p id="modalArtCategory" style="font-size: 0.75rem; color: #6b7280;">Category</p>
+            <p id="modalCustomChoicePreview" style="font-size: 0.78rem; color: #ff3366; font-weight: 600; margin-top: 2px;"></p>
+          </div>
+          <div style="text-align: right;">
+            <div id="modalArtPrice" style="font-size: 1.2rem; font-weight: 700; color: #059669;">₹0</div>
+          </div>
+        </div>
+
+        <form id="orderForm">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 0.85rem; font-weight: 700; color: #374151;">1. Contact & Shipping Address</span>
+            <button type="button" id="btnGetLocation" style="background: #e0f2fe; color: #0284c7; border: 1.5px solid #bae6fd; border-radius: 8px; padding: 5px 10px; font-size: 0.74rem; font-weight: 700; cursor: pointer;">
+              📍 Use Current Location
+            </button>
+          </div>
+
+          <div id="locationNotice" style="display: none; font-size: 0.76rem; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px;"></div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 600; color: #4b5563; display: block; margin-bottom: 3px;">Full Name *</label>
+              <input type="text" id="custName" placeholder="Name" required style="width: 100%; padding: 9px 11px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 0.88rem;" />
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 600; color: #4b5563; display: block; margin-bottom: 3px;">Phone Number *</label>
+              <input type="tel" id="custPhone" placeholder="10-digit number" pattern="[0-9]{10}" required style="width: 100%; padding: 9px 11px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 0.88rem;" />
+            </div>
+          </div>
+
+          <div style="margin-bottom: 8px;">
+            <label style="font-size: 0.78rem; font-weight: 600; color: #4b5563; display: block; margin-bottom: 3px;">Door No., Street, Landmark *</label>
+            <input type="text" id="custStreet" placeholder="e.g. D.No 4-12, Near SBI Bank, Main Road" required style="width: 100%; padding: 9px 11px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 0.88rem;" />
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 600; color: #4b5563; display: block; margin-bottom: 3px;">City *</label>
+              <input type="text" id="custCity" placeholder="City" required style="width: 100%; padding: 9px 11px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 0.88rem;" />
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 600; color: #4b5563; display: block; margin-bottom: 3px;">Pincode *</label>
+              <input type="text" id="custPincode" placeholder="6-digit PIN" pattern="[0-9]{6}" required style="width: 100%; padding: 9px 11px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 0.88rem;" />
+            </div>
+          </div>
+
+          <input type="hidden" id="custGpsMapLink" value="" />
+
+          <div style="font-size: 0.85rem; font-weight: 700; color: #374151; margin-bottom: 6px;">2. Delivery Zone</div>
+          <div style="margin-bottom: 12px;">
+            <select id="deliveryZoneSelect" style="width: 100%; padding: 10px 12px; border: 1.5px solid #ffccd5; background: #fff8f9; border-radius: 10px; font-size: 0.88rem; font-weight: 600;">
+              <option value="40" data-name="Local City (0-15 km)">🛵 Local City (Within 10–15 km) — +₹40</option>
+              <option value="70" data-name="State Courier" selected>📦 Regional / Within State Courier — +₹70</option>
+              <option value="130" data-name="Pan-India Express">✈️ Pan-India Express (Fragile Safe) — +₹130</option>
+              <option value="0" data-name="Self Pickup">🏬 Self Pickup at Studio — ₹0 Free</option>
+            </select>
+          </div>
+
+          <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; font-size: 0.85rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px; color: #4b5563;">
+              <span>Item Price:</span>
+              <span id="summaryItemPrice" style="font-weight: 600;">₹0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px; color: #4b5563;">
+              <span>Delivery Fee:</span>
+              <span id="summaryDeliveryFee" style="font-weight: 600; color: #0284c7;">+₹70</span>
+            </div>
+            <!-- Promo Coupon Code Box -->
+        <div class="coupon-box" style="margin: 14px 0; background: #fff5f7; border: 1.5px dashed #ff758c; padding: 12px; border-radius: 10px;">
+          <label style="font-size: 0.8rem; font-weight: 600; color: #22223b; display: block; margin-bottom: 6px;">Have a Promo Code?</label>
+          <div style="display: flex; gap: 8px;">
+            <input 
+              type="text" 
+              id="couponInput" 
+              placeholder="e.g. VYORA10" 
+              style="flex: 1; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.85rem;" 
+            />
+            <button 
+              type="button" 
+              id="applyCouponBtn" 
+              style="background: #ff3366; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer;"
+            >
+              Apply
+            </button>
+          </div>
+          <div id="couponFeedback" style="font-size: 0.76rem; font-weight: 600; margin-top: 6px; display: none;"></div>
+        </div>
+
+        <!-- Discount Breakdown Display -->
+        <div id="discountRow" style="display: none; justify-content: space-between; font-size: 0.85rem; color: #059669; font-weight: 600; margin-bottom: 6px;">
+          <span>Coupon Discount:</span>
+          <span id="discountValueDisplay">-₹0</span>
+        </div>
+            <div style="display: flex; justify-content: space-between; border-top: 1px solid #e5e7eb; padding-top: 5px; font-size: 0.95rem; font-weight: 700; color: #059669;">
+              <span>Grand Total:</span>
+              <span id="summaryGrandTotal">₹0</span>
+            </div>
+          </div>
+
+          <div style="font-size: 0.85rem; font-weight: 700; color: #374151; margin-bottom: 6px;">3. Payment Method</div>
+          <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px;">
+            <label style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1.5px solid #e5e7eb; border-radius: 8px; background: #fafafa; cursor: pointer;">
+              <input type="radio" name="paymentMethod" value="COD" checked style="accent-color: #ff3366;" />
+              <div>
+                <strong style="font-size: 0.88rem; color: #22223b;">Cash on Delivery (COD)</strong>
+              </div>
+            </label>
+
+            <label style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1.5px solid #ffccd5; border-radius: 8px; background: #fff8f9; cursor: pointer;">
+              <input type="radio" name="paymentMethod" value="UPI Online" style="accent-color: #ff3366;" />
+              <div>
+                <strong style="font-size: 0.88rem; color: #22223b;">Pay via UPI (PhonePe / GPay / Paytm)</strong>
+              </div>
+            </label>
+          </div>
+
+        <!-- Inside #checkoutUpiPanel, right below formUpiQrImg: -->
+         <div id="checkoutUpiPanel" style="display: none; background: #fff8f9; border: 1.5px solid #ffccd5; border-radius: 12px; padding: 12px; margin-bottom: 14px;">
+            <p style="font-size: 0.78rem; color: #4b5563; margin-bottom: 8px;">Tap your installed app to pay. Your order receipt will confirm automatically:</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px;">
+              <button type="button" class="direct-upi-trigger-btn" data-app="PhonePe" style="padding: 9px; background: #fff; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 0.82rem; font-weight: 700; color: #5f259f; cursor: pointer;">🟣 PhonePe</button>
+              <button type="button" class="direct-upi-trigger-btn" data-app="Google Pay" style="padding: 9px; background: #fff; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 0.82rem; font-weight: 700; color: #1f2937; cursor: pointer;">🔵 GPay</button>
+              <button type="button" class="direct-upi-trigger-btn" data-app="Paytm" style="padding: 9px; background: #fff; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 0.82rem; font-weight: 700; color: #00b9f5; cursor: pointer;">🔷 Paytm</button>
+              <button type="button" class="direct-upi-trigger-btn" data-app="Any UPI" style="padding: 9px; background: #fff; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 0.82rem; font-weight: 700; color: #00796b; cursor: pointer;">🟢 Any UPI</button>
+            </div>
+            <div style="text-align: center; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #e5e7eb;">
+              <img id="formUpiQrImg" src="" alt="UPI QR" style="width: 155px; height: 155px; display: block; margin: 0 auto 4px;" />
+              <small style="color:#718096; font-size:0.75rem; display:block;">Scan QR code with any UPI app</small>
+            </div>
+          </div>
+
+          <!-- Main Submit Button (Only active for COD) -->
+          <button type="submit" id="mainSubmitOrderBtn" class="btn-primary" style="width: 100%; padding: 13px; font-size: 1rem; border: none; cursor: pointer;">
+            Confirm & Place Order (Cash on Delivery) 🛍️
+          </button>
+        </form>
+      </div>
+
+      <!-- Verifying Screen -->
+      <div id="paymentVerifyingView" style="display: none; text-align: center; padding: 40px 10px;">
+        <div style="width: 50px; height: 50px; border: 4px solid #f3f4f6; border-top: 4px solid #ff3366; border-radius: 50%; animation: spinLoader 0.9s linear infinite; margin: 0 auto 12px;"></div>
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.3rem; color: #22223b;">Verifying Your Payment...</h3>
+        <p style="font-size: 0.82rem; color: #6b7280;">Generating order invoice receipt.</p>
+      </div>
+
+      <!-- Confirmed Invoice Screen -->
+      <div id="orderSuccessView" style="display: none; text-align: center; padding: 14px 6px;">
+        <div style="width: 50px; height: 50px; background: #d1fae5; color: #059669; border-radius: 50%; font-size: 1.6rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;">✓</div>
+        <h2 id="successHeading" style="font-family: 'Playfair Display', serif; font-size: 1.45rem; color: #059669; margin-bottom: 2px;">Order Confirmed!</h2>
+        <p id="successSubtext" style="font-size: 0.82rem; color: #6b7280; margin-bottom: 12px;">We are handcrafting your item now.</p>
+        
+        <div class="receipt-box" id="receiptContent" style="background: #f9fafb; border: 1.5px dashed #d1d5db; border-radius: 12px; padding: 14px; margin-bottom: 14px; text-align: left; font-size: 0.85rem; line-height: 1.6;"></div>
+
+        <div style="display: flex; gap: 8px;">
+          <button type="button" id="sendWhatsAppReceiptBtn" style="flex: 1; padding: 11px; background: #25d366; color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer;">
+            💬 WhatsApp
+          </button>
+          <button type="button" id="trackThisOrderNowBtn" style="flex: 1; padding: 11px; background: #ff3366; color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer;">
+            📍 Track
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer-Facing Live Order Tracker Modal -->
+  <div class="modal-overlay" id="customerTrackModal">
+    <div class="modal-box" style="max-width: 520px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 22px; border-radius: 20px; background: #fff;">
+      <button type="button" class="close-btn" id="closeTrackModal">&times;</button>
+      
+      <div style="text-align: center; margin-bottom: 16px;">
+        <span style="font-size: 0.75rem; font-weight: 700; color: #ff3366; letter-spacing: 1.5px; text-transform: uppercase;">ORDER TRACKING</span>
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #22223b; margin-top: 2px;">Track Your Creation</h3>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+        <input type="text" id="trackInputQuery" placeholder="Enter Order ID (e.g. CIY-123456) or Mobile" style="flex: 1; padding: 10px 12px; border: 1.5px solid #d1d5db; border-radius: 10px; font-size: 0.88rem; outline: none;" />
+        <button type="button" id="searchTrackBtn" style="padding: 10px 18px; background: #ff3366; color: #fff; border: none; border-radius: 10px; font-weight: 600; font-size: 0.88rem; cursor: pointer;">
+          Track 🔍
+        </button>
+      </div>
+
+      <div id="trackErrorMsg" style="display: none; background: #fee2e2; color: #dc2626; padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; margin-bottom: 12px; text-align: center;">
+        No active orders found matching that ID or phone number.
+      </div>
+
+      <div id="trackResultContainer" style="display: none;"></div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes spinLoader {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+
+  <script src="script.js"></script>
+  <!-- Floating Gift Box Offer Badge -->
+  <div id="surpriseOfferPill" style="position: fixed; bottom: 24px; left: 20px; z-index: 999; background: #ffffff; border: 1.5px solid #ff3366; border-radius: 30px; padding: 8px 16px; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 24px rgba(255, 51, 102, 0.2); cursor: pointer;">
+    <span style="font-size: 1.2rem;">🎁</span>
+    <span style="font-size: 0.82rem; font-weight: 700; color: #22223b;">Tap for Today's Secret Code</span>
+  </div>
+ <!-- ========================================== -->
+  <!-- 🎁 SECRET VOUCHER POPUP MODAL (VYORA)      -->
+  <!-- ========================================== -->
+  <div id="voucherModalOverlay" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.65); backdrop-filter: blur(4px); z-index: 99999; justify-content: center; align-items: center; padding: 20px;">
+    <div style="background: #ffffff; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; padding: 28px 22px; box-shadow: 0 20px 45px rgba(0,0,0,0.25); position: relative;">
+      
+      <!-- Close Button -->
+      <button id="closeVoucherModalBtn" type="button" style="position: absolute; top: 12px; right: 14px; background: none; border: none; font-size: 1.6rem; color: #9ca3af; cursor: pointer; line-height: 1;">&times;</button>
+      
+      <div style="font-size: 2.8rem; margin-bottom: 6px;">🎉</div>
+      <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #22223b; margin-bottom: 6px;">Today's Exclusive Gift!</h3>
+      <p id="voucherModalTagline" style="font-size: 0.88rem; color: #6b7280; margin-bottom: 18px; line-height: 1.4;">
+        Apply this promo code at checkout to unlock savings on your order.
+      </p>
+
+      <!-- Promo Code Ticket Display -->
+      <div style="background: #fff0f3; border: 2px dashed #ff3366; border-radius: 12px; padding: 14px; margin-bottom: 18px;">
+        <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; color: #ff3366; display: block; margin-bottom: 4px;">PROMO CODE</span>
+        <div id="voucherModalCodeDisplay" style="font-size: 1.6rem; font-weight: 800; letter-spacing: 3px; color: #ff3366;">VYORA10</div>
+      </div>
+
+      <!-- Action Button -->
+      <button id="applyVoucherAutoBtn" type="button" style="width: 100%; background: linear-gradient(135deg, #ff3366, #ff758c); color: #ffffff; border: none; padding: 12px 18px; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 14px rgba(255, 51, 102, 0.3);">
+        📋 Copy & Apply Discount
+      </button>
+      <div id="voucherCopiedToast" style="display: none; color: #059669; font-size: 0.82rem; font-weight: 700; margin-top: 10px;">
+        ✅ Code applied! You're ready to checkout.
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Gift Box Offer Badge with Guaranteed Click -->
+  <div id="surpriseOfferPill" onclick="openVyoraVoucherModal()" style="position: fixed; bottom: 24px; left: 20px; z-index: 9999; background: #ffffff; border: 1.5px solid #ff3366; border-radius: 30px; padding: 10px 18px; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 24px rgba(255, 51, 102, 0.25); cursor: pointer; user-select: none;">
+    <span style="font-size: 1.3rem;">🎁</span>
+    <span style="font-size: 0.85rem; font-weight: 700; color: #22223b;">Tap for Today's Secret Code</span>
+  </div>
+
+  <script>
+    // Bulletproof direct modal opener
+    function openVyoraVoucherModal() {
+      let promo = { enabled: true, code: "VYORA10", label: "10% OFF on your entire order" };
+      try {
+        const stored = localStorage.getItem('vyora_promo_settings');
+        if (stored) {
+          promo = JSON.parse(stored);
+        }
+      } catch (err) {}
+
+      // If intentionally turned OFF in admin, do not open
+      if (promo.enabled === false) {
+        alert("No discount promo is currently active.");
+        return;
+      }
+
+      const modal = document.getElementById('voucherModalOverlay');
+      const codeDisplay = document.getElementById('voucherModalCodeDisplay');
+      const tagline = document.getElementById('voucherModalTagline');
+      const toast = document.getElementById('voucherCopiedToast');
+
+      if (codeDisplay) codeDisplay.textContent = promo.code || "VYORA10";
+      if (tagline) tagline.textContent = promo.label || "Special discount at checkout!";
+      if (toast) toast.style.display = "none";
+
+      if (modal) {
+        modal.style.display = "flex";
+      }
+    }
+
+    // Modal Close
+    document.addEventListener("DOMContentLoaded", function() {
+      const closeBtn = document.getElementById('closeVoucherModalBtn');
+      const modal = document.getElementById('voucherModalOverlay');
+      const autoBtn = document.getElementById('applyVoucherAutoBtn');
+      const toast = document.getElementById('voucherCopiedToast');
+
+      if (closeBtn && modal) {
+        closeBtn.onclick = function() { modal.style.display = 'none'; };
+        modal.onclick = function(e) {
+          if (e.target === modal) modal.style.display = 'none';
+        };
+      }
+
+      if (autoBtn) {
+        autoBtn.onclick = function() {
+          let code = "VYORA10";
+          try {
+            const stored = localStorage.getItem('vyora_promo_settings');
+            if (stored) code = JSON.parse(stored).code || "VYORA10";
+          } catch(e) {}
+
+          // Copy to clipboard
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(code).catch(function(){});
+          }
+
+          // Fill into checkout coupon input if present
+          const input = document.getElementById('couponInput');
+          if (input) {
+            input.value = code;
+          }
+
+          // Trigger promo calculation if function exists
+          if (typeof applyStorePromo === 'function') {
+            applyStorePromo(code);
+          }
+
+          if (toast) toast.style.display = 'block';
+
+          setTimeout(function() {
+            if (modal) modal.style.display = 'none';
+          }, 1000);
+        };
+      }
+    });
+  </script>
+  <!-- Floating Payment Failure / Status Toast -->
+  <div id="paymentStatusToast" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #fee2e2; border: 1.5px solid #f87171; color: #b91c1c; padding: 12px 20px; border-radius: 30px; font-size: 0.86rem; font-weight: 700; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 100000; align-items: center; gap: 8px; text-align: center; max-width: 90vw;">
+    <span style="font-size: 1.1rem;">⚠️</span>
+    <span id="paymentStatusToastMsg">Payment Failed or Cancelled. Please retry or choose Cash on Delivery.</span>
+  </div>
+</body>
+</html>
