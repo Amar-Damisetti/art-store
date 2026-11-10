@@ -653,7 +653,6 @@ function syncOrderToGoogleSheet(orderData) {
     body: JSON.stringify(orderData)
   }).catch(err => console.error("Error syncing to Google Sheet:", err));
 }
-
 function finalizeAndShowReceipt(orderData) {
   clearTimeout(desktopFallbackTimer);
   lastPlacedOrderData = orderData;
@@ -667,7 +666,7 @@ function finalizeAndShowReceipt(orderData) {
   const successHeading = document.getElementById('successHeading');
   const successSubtext = document.getElementById('successSubtext');
 
-  if (orderData.payment.includes('UPI')) {
+  if (orderData.payment && orderData.payment.includes('UPI')) {
     if (successHeading) successHeading.textContent = "Payment Verified & Order Confirmed! 🎉";
     if (successSubtext) successSubtext.textContent = "Thank you! Your payment was received and our artisan has begun preparation.";
   } else {
@@ -678,21 +677,36 @@ function finalizeAndShowReceipt(orderData) {
   const mapLinkSnippet = orderData.googleMapsLink ? 
     `<p><strong>📍 GPS Location Pin:</strong> <a href="${orderData.googleMapsLink}" target="_blank" style="color:#0284c7; text-decoration:underline;">View on Google Maps</a></p>` : '';
 
+  // Generate WhatsApp routing link
+  const waUrl = typeof generateWhatsAppOrderUrl === 'function' ? generateWhatsAppOrderUrl(orderData) : '#';
+
   if (receiptContent) {
     receiptContent.innerHTML = `
       <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #e5e7eb; padding-bottom:6px;">
         <span><strong>Order ID:</strong> ${orderData.orderId}</span>
-        <span style="color:#059669; font-weight:700;">${orderData.payment.includes('UPI') ? '🟢 PAID' : '🟡 COD CONFIRMED'}</span>
+        <span style="color:#059669; font-weight:700;">${(orderData.payment && orderData.payment.includes('UPI')) ? '🟢 PAID' : '🟡 COD CONFIRMED'}</span>
       </div>
-      <p><strong>Item:</strong> ${orderData.item}</p>
-      <p><strong>Customization:</strong> ${orderData.customSelection}</p>
+      <p><strong>Item:</strong> ${orderData.item || orderData.categoryInfo || 'Product'}</p>
+      <p><strong>Customization:</strong> ${orderData.customOrderText || orderData.customSelection || 'Standard'}</p>
+      <p><strong>Gift Wrap:</strong> ${orderData.giftWrap ? 'Yes (+₹50)' : 'No'}</p>
       <p><strong>Item Cost:</strong> ${orderData.itemPrice}</p>
-      <p><strong>Delivery Fee:</strong> ${orderData.deliveryFee} (${orderData.deliveryZone})</p>
-      <p style="font-size:1rem; font-weight:700; color:#059669;"><strong>Grand Total:</strong> ${orderData.price}</p>
-      <p><strong>Payment Status:</strong> ${orderData.payment}</p>
-      <p><strong>Deliver To:</strong> ${orderData.customerName}, ${orderData.phone}</p>
+      <p><strong>Delivery Fee:</strong> ${orderData.deliveryFee} (${orderData.deliveryZone || 'Standard'})</p>
+      <p style="font-size:1rem; font-weight:700; color:#059669;"><strong>Grand Total:</strong> ${orderData.price || orderData.totalPrice || ''}</p>
+      <p><strong>Payment Status:</strong> ${orderData.payment || orderData.paymentMode || 'COD'}</p>
+      <p><strong>Deliver To:</strong> ${orderData.customerName || orderData.name}, ${orderData.phone}</p>
       <p><strong>Address:</strong> ${orderData.address}</p>
       ${mapLinkSnippet}
+
+      <!-- 👇 WHATSAPP ACTION BUTTON 👇 -->
+      <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed #d1d5db; text-align: center;">
+        <a href="${waUrl}" target="_blank" 
+           style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #25D366; color: #ffffff; text-decoration: none; padding: 12px 18px; border-radius: 25px; font-weight: 700; font-size: 0.92rem; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.35);">
+          <span>💬</span> Send Order Details to WhatsApp
+        </a>
+        <small style="display: block; color: #6b7280; font-size: 0.74rem; margin-top: 6px;">
+          Tap to send address confirmation & high-res reference photos.
+        </small>
+      </div>
     `;
   }
 
@@ -712,6 +726,9 @@ function finalizeAndShowReceipt(orderData) {
 
   isAwaitingUpiReturn = false;
   pendingOrderDraft = null;
+  setTimeout(() => {
+    openWhatsAppOrder(orderData);
+  }, 1200);
 }
 
 // ==========================================================================
@@ -1570,4 +1587,43 @@ function toggleGiftWrapPrice(checkbox) {
   if (typeof updateOrderTotal === 'function') {
     updateOrderTotal();
   }
+}
+// --- LIVE WHATSAPP ORDER ROUTING ---
+const VYORA_WHATSAPP_NUMBER = "919491396383"; // 👈 Replace with your 10-digit WhatsApp number (with 91 prefix)
+
+function generateWhatsAppOrderUrl(order) {
+  const customNote = order.customOrderText || order.customMessage || order.note || 'None';
+  const wrapText = order.giftWrap ? 'Yes (+₹50)' : 'No';
+  const totalAmount = order.totalPrice || order.itemPrice || '';
+
+  const messageText = 
+`🛍️ *NEW ORDER - VYORA STUDIO*
+━━━━━━━━━━━━━━━━━━
+🆔 *Order ID:* ${order.orderId || 'VYORA'}
+📅 *Date:* ${order.orderDate || new Date().toLocaleDateString('en-IN')}
+
+👤 *CUSTOMER DETAILS:*
+• *Name:* ${order.name || order.customerName || 'N/A'}
+• *Phone:* ${order.phone || order.customerPhone || 'N/A'}
+• *Address:* ${order.address || 'N/A'}
+
+📦 *ORDER SPECIFICATIONS:*
+• *Product:* ${order.categoryInfo || order.itemsSummary || 'Handcrafted Art'}
+• *Customization Note:* ${customNote}
+• *Gift Packaging:* ${wrapText}
+
+💰 *PAYMENT & BILLING:*
+• *Total Payable:* ₹${totalAmount}
+• *Payment Mode:* ${order.paymentMode || order.paymentMethod || 'Online / COD'}
+
+${order.customPhoto ? '📸 *Photo Uploaded:* Yes (I will also attach high-res photo in this chat)' : ''}
+━━━━━━━━━━━━━━━━━━
+_Please confirm my order and share dispatch updates here!_`;
+
+  return `https://wa.me/${VYORA_WHATSAPP_NUMBER}?text=${encodeURIComponent(messageText)}`;
+}
+
+function openWhatsAppOrder(order) {
+  const url = generateWhatsAppOrderUrl(order);
+  window.open(url, '_blank');
 }
