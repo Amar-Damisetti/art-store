@@ -267,7 +267,7 @@ function renderProductGrid() {
     card.className = 'art-card';
     const mainImg = (prod.images && prod.images.length > 0) ? prod.images[0] : 'images/logo1.png';
 
-    card.innerHTML = `
+   card.innerHTML = `
       <div class="img-wrapper">
         <span class="card-badge">${prod.customizable ? '✨ Custom Choice' : 'Handmade'}</span>
         <img src="${mainImg}" alt="${prod.title}" onerror="this.src='images/logo1.png'">
@@ -278,6 +278,18 @@ function renderProductGrid() {
           <span class="subcat-label">• ${prod.subCategoryName || prod.subCategory}</span>
         </div>
         <h3>${prod.title}</h3>
+        
+        <!-- 👇 STAR RATING & HANDCRAFTED BADGE 👇 -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin: 6px 0 8px 0; font-size: 0.75rem;">
+          <span style="display: inline-flex; align-items: center; gap: 4px; color: #d97706; font-weight: 700; background: #fffbeb; padding: 2px 7px; border-radius: 6px; border: 1px solid #fef3c7;">
+            ★ 4.9 <span style="color: #6b7280; font-weight: 500;">(42)</span>
+          </span>
+          <span style="color: #059669; font-weight: 600; font-size: 0.72rem; display: inline-flex; align-items: center; gap: 3px;">
+            ✓ Handcrafted to Order
+          </span>
+        </div>
+        <!-- 👆 END OF RATING BADGE 👆 -->
+
         <div class="price-box">
           <span class="discount-price">${prod.discountPrice}</span>
           <span class="original-price">${prod.originalPrice}</span>
@@ -325,6 +337,7 @@ function openQuickView(prod) {
   if (detailBadge) detailBadge.textContent = prod.discountBadge;
   if (detailDesc) detailDesc.textContent = prod.description;
   if (customPersonalNote) customPersonalNote.value = '';
+  updateCareGuideForProduct(prod); // (or whatever variable name your product has, like 'product' or 'item')
 
   if (detailMainImg) {
     detailMainImg.src = (prod.images && prod.images.length > 0) ? prod.images[0] : 'images/logo1.png';
@@ -1626,4 +1639,37 @@ _Please confirm my order and share dispatch updates here!_`;
 function openWhatsAppOrder(order) {
   const url = generateWhatsAppOrderUrl(order);
   window.open(url, '_blank');
+}
+// Function to swap care tips dynamically depending on item category
+function updateCareGuideForProduct(product) {
+  const guideContainer = document.getElementById('dynamicCareGuideContent');
+  if (!guideContainer || !product) return;
+
+  const category = (product.mainCategoryName || product.mainCategory || product.category || '').toLowerCase();
+
+  if (category.includes('bottle') || category.includes('glow')) {
+    guideContainer.innerHTML = `
+      <ul style="padding-left: 18px; margin: 0; font-size: 0.8rem; line-height: 1.5;">
+        <li>Sealed with waterproof clear protective resin varnish.</li>
+        <li>Wipe glass gently with a damp microfiber cloth. Do not soak in boiling water.</li>
+        <li>Replaceable warm-white LED batteries are fitted into the cork top.</li>
+      </ul>
+    `;
+  } else if (category.includes('resin') || category.includes('clock')) {
+    guideContainer.innerHTML = `
+      <ul style="padding-left: 18px; margin: 0; font-size: 0.8rem; line-height: 1.5;">
+        <li>Keep away from prolonged, intense direct sunlight to maintain crystal clarity.</li>
+        <li>Dust lightly with a dry microfiber cloth or soft duster.</li>
+        <li>Water-resistant surface; avoid harsh alcohol-based sprays.</li>
+      </ul>
+    `;
+  } else {
+    guideContainer.innerHTML = `
+      <ul style="padding-left: 18px; margin: 0; font-size: 0.8rem; line-height: 1.5;">
+        <li>Freshly prepared and sealed right before dispatch.</li>
+        <li>Store in an airtight jar in a cool, dry place away from humidity.</li>
+        <li>Best enjoyed within 14–20 days of delivery.</li>
+      </ul>
+    `;
+  }
 }
