@@ -34,8 +34,7 @@ const defaultStarterProducts = [
     customizable: true,
     customOptions: [],
     images: [
-      "images/bottle1.jpg",
-      "https://images.unsplash.com/photo-1543257580-7269da773bf5?auto=format&fit=crop&w=800&q=80"
+      "images/bottle1.jpg"
     ],
     video: ""
   },
