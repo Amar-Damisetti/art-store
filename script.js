@@ -531,7 +531,12 @@ function recalculateCheckoutTotals() {
   const selectedOption = deliveryZoneSelect ? deliveryZoneSelect.options[deliveryZoneSelect.selectedIndex] : null;
   const zoneName = selectedOption ? (selectedOption.getAttribute('data-name') || 'Courier') : 'Courier';
 
-  currentCalculatedTotal = itemPriceNum + deliveryFeeNum;
+  // Check if Gift Wrap (+₹50) is selected
+  const giftWrapCheck = document.getElementById('giftWrapCheck');
+  const giftWrapFee = (giftWrapCheck && giftWrapCheck.checked) ? 50 : 0;
+
+  // Include giftWrapFee in the total
+  currentCalculatedTotal = itemPriceNum + deliveryFeeNum + giftWrapFee;
 
   if (summaryItemPrice) summaryItemPrice.textContent = `₹${itemPriceNum.toLocaleString('en-IN')}`;
   if (summaryDeliveryFee) summaryDeliveryFee.textContent = deliveryFeeNum === 0 ? 'FREE' : `+₹${deliveryFeeNum}`;
@@ -587,6 +592,11 @@ function collectCurrentOrderData(paymentMode) {
   const categoryInfo = `${currentActiveProduct.mainCategoryName} (${currentActiveProduct.subCategoryName})`;
   const customBlueprint = liveSummaryText ? liveSummaryText.textContent : 'Standard Configuration';
   const note = customPersonalNote ? customPersonalNote.value.trim() : 'None';
+  const customMessageInput = document.getElementById('orderCustomMessage');
+  const customOrderText = customMessageInput ? customMessageInput.value.trim() : '';
+  const customPhotoData = (typeof customerAttachedPhotoBase64 !== 'undefined') ? customerAttachedPhotoBase64 : '';
+  const isGiftWrap = document.getElementById('giftWrapCheck') ? document.getElementById('giftWrapCheck').checked : false;
+  const giftWrapFeeNum = isGiftWrap ? 50 : 0;
   const fullAddress = `${street}, ${city} - ${pincode}`;
 
   const itemPriceNum = parseInt((currentActiveProduct.discountPrice || '0').replace(/[^0-9]/g, '')) || 0;
@@ -1526,3 +1536,38 @@ if (applyCouponBtn && couponInput) {
 
 // Check promo visibility whenever storefront loads
 syncStorePromoVisibility();
+// --- CUSTOMIZATION & PHOTO UPLOAD HELPERS ---
+let customerAttachedPhotoBase64 = "";
+let giftWrapPrice = 0;
+
+// Preview & Convert customer uploaded image to Base64
+function previewCustomerUploadedImage(input) {
+  const file = input.files && input.files[0];
+  if (file) {
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image is larger than 5MB. Please choose a smaller photo or share it via WhatsApp.");
+      input.value = "";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      customerAttachedPhotoBase64 = e.target.result;
+      const previewImg = document.getElementById('photoPreviewImg');
+      const container = document.getElementById('photoPreviewContainer');
+      if (previewImg && container) {
+        previewImg.src = customerAttachedPhotoBase64;
+        container.style.display = 'block';
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+// Toggle +₹50 Gift wrap in total calculation
+function toggleGiftWrapPrice(checkbox) {
+  recalculateCheckoutTotals();
+  giftWrapPrice = checkbox.checked ? 50 : 0;
+  if (typeof updateOrderTotal === 'function') {
+    updateOrderTotal();
+  }
+}

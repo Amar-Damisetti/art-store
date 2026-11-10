@@ -519,6 +519,11 @@
             <th>Customer Info</th>
             <th>Shipping Address & Maps</th>
             <th>Actions</th>
+            <th>Customers</th>
+            <th>Items</th>
+            <th>Customization & Photo</th>
+            <th>Total</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody id="ordersTbody"></tbody>
@@ -1481,6 +1486,49 @@
       const encoded = encodeURIComponent(msg);
       window.open(`https://wa.me/${phoneClean}?text=${encoded}`, '_blank');
     };
+
+    // Function to build each order row with customization & download button
+function renderOrderRow(order) {
+  let photoSnippet = '<span style="color:#9ca3af; font-size:0.75rem;">No photo</span>';
+
+  const photo = order.customPhoto || order.photo;
+  const orderId = order.orderId || order.id || 'VYORA';
+  const custName = order.name || order.customerName || 'Customer';
+  const custPhone = order.phone || order.customerPhone || '';
+  const message = order.customOrderText || order.customMessage || order.note || '';
+
+  if (photo) {
+    photoSnippet = `
+      <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+        <img src="${photo}" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px; border: 1px solid #e5e7eb;" />
+        <a href="${photo}" download="Order-${orderId}-CustomerPhoto.png" 
+           style="background: #059669; color: #fff; padding: 3px 8px; border-radius: 6px; text-decoration: none; font-size: 0.72rem; font-weight: 700; display: inline-block;">
+          📥 Save
+        </a>
+      </div>
+    `;
+  }
+
+  return `
+    <tr>
+      <td>
+        <strong>${custName}</strong><br>
+        <small style="color: #6b7280;">${custPhone}</small>
+      </td>
+      <td>
+        <div>${order.categoryInfo || order.itemsSummary || 'Custom Art'}</div>
+        <small style="color: #9ca3af;">${orderId}</small>
+      </td>
+      <td>
+        <div style="font-size: 0.8rem;"><strong>Note:</strong> ${message ? message : '<span style="color:#9ca3af;">None</span>'}</div>
+        <div style="font-size: 0.8rem;"><strong>Wrap:</strong> ${order.giftWrap ? '<span style="color:#ff3366; font-weight:700;">Yes (+₹50)</span>' : 'No'}</div>
+        ${photoSnippet}
+      </td>
+      <td><strong>₹${order.itemPrice || order.totalPrice || order.discountPrice || ''}</strong></td>
+      <td><span style="font-size: 0.8rem; font-weight: 600;">${order.status || 'Pending'}</span></td>
+    </tr>
+  `;
+}
 
     function renderOrdersTableRows() {
       const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
