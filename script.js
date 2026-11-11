@@ -1131,63 +1131,44 @@ if (brandLogoThumb && logoFullscreenModal) {
   });
 }
 
-// --- PWA INSTALL BANNER & SERVICE WORKER CONTROLLER ---
-let deferredInstallPrompt = null;
-const pwaBanner = document.getElementById('pwaInstallBanner');
+// PWA ServiceWorker Registration & Install Prompt Handler
+let deferredPrompt;
+const pwaInstallBanner = document.getElementById('pwaInstallBanner');
 const btnInstallPwa = document.getElementById('btnInstallPwa');
 const btnClosePwaBanner = document.getElementById('btnClosePwaBanner');
 
-// 1. Register Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then((reg) => console.log('VYORA SW Registered:', reg.scope))
-      .catch((err) => console.log('VYORA SW Registration failed:', err));
+    navigator.serviceWorker.register('./sw.js').catch(err => {
+      console.log('ServiceWorker registration skipped:', err);
+    });
   });
 }
 
-// 2. Listen for Chrome Install Prompt
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
-  deferredInstallPrompt = e;
-
-  // Show banner only if the user hasn't dismissed it this session
-  if (pwaBanner && !sessionStorage.getItem('vyora_pwa_dismissed')) {
-    pwaBanner.style.display = 'flex';
+  deferredPrompt = e;
+  if (pwaInstallBanner) {
+    pwaInstallBanner.style.display = 'flex';
   }
 });
 
-// 3. When Customer Taps "Install"
 if (btnInstallPwa) {
   btnInstallPwa.addEventListener('click', async () => {
-    if (!deferredInstallPrompt) {
-      alert("To install VYORA:\n• On Android Chrome: Tap ⋮ (top-right menu) > 'Add to Home screen'\n• On iPhone Safari: Tap Share (⎋) > 'Add to Home Screen'");
-      return;
-    }
-
-    deferredInstallPrompt.prompt();
-    const { outcome } = await deferredInstallPrompt.userChoice;
-
-    if (outcome === 'accepted') {
-      if (pwaBanner) pwaBanner.style.display = 'none';
-    }
-    deferredInstallPrompt = null;
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    if (pwaInstallBanner) pwaInstallBanner.style.display = 'none';
   });
 }
 
-// 4. When Customer Taps the "×" Close Button
 if (btnClosePwaBanner) {
   btnClosePwaBanner.addEventListener('click', () => {
-    if (pwaBanner) pwaBanner.style.display = 'none';
-    sessionStorage.setItem('vyora_pwa_dismissed', 'true');
+    if (pwaInstallBanner) pwaInstallBanner.style.display = 'none';
   });
 }
 
-// 5. Auto-hide if already installed
-window.addEventListener('appinstalled', () => {
-  if (pwaBanner) pwaBanner.style.display = 'none';
-  deferredInstallPrompt = null;
-});
 // URL Check
 window.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -1692,60 +1673,3 @@ function updateCareGuideForProduct(product) {
     `;
   }
 }
-// --- PWA SERVICE WORKER & ENHANCED INSTALL PROMPT ---
-let deferredPrompt = null;
-const pwaInstallBanner = document.getElementById('pwaInstallBanner');
-const btnInstallPwa = document.getElementById('btnInstallPwa');
-const btnClosePwaBanner = document.getElementById('btnClosePwaBanner');
-
-// 1. Register Service Worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('VYORA SW Registered:', reg.scope))
-      .catch(err => console.log('ServiceWorker registration skipped:', err));
-  });
-}
-
-// 2. Capture Chrome Install Prompt
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-
-  // Show banner only if customer hasn't dismissed it during this visit
-  if (pwaInstallBanner && !sessionStorage.getItem('vyora_pwa_dismissed')) {
-    pwaInstallBanner.style.display = 'flex';
-  }
-});
-
-// 3. Handle Install Button Tap
-if (btnInstallPwa) {
-  btnInstallPwa.addEventListener('click', async () => {
-    if (!deferredPrompt) {
-      alert("To install VYORA:\n• On Android Chrome: Tap ⋮ (top-right menu) > 'Add to Home screen'\n• On iPhone Safari: Tap Share (⎋) > 'Add to Home Screen'");
-      return;
-    }
-
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === 'accepted') {
-      if (pwaInstallBanner) pwaInstallBanner.style.display = 'none';
-    }
-    deferredPrompt = null;
-  });
-}
-
-// 4. Handle Close Button Tap
-if (btnClosePwaBanner) {
-  btnClosePwaBanner.addEventListener('click', () => {
-    if (pwaInstallBanner) pwaInstallBanner.style.display = 'none';
-    sessionStorage.setItem('vyora_pwa_dismissed', 'true');
-  });
-}
-
-// 5. Hide Banner After Successful Installation
-window.addEventListener('appinstalled', () => {
-  if (pwaInstallBanner) pwaInstallBanner.style.display = 'none';
-  deferredPrompt = null;
-});
