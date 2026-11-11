@@ -1692,55 +1692,60 @@ function updateCareGuideForProduct(product) {
     `;
   }
 }
-// --- PWA INSTALL BANNER & SERVICE WORKER REGISTRATION ---
+// --- PWA SERVICE WORKER & ENHANCED INSTALL PROMPT ---
 let deferredPrompt = null;
-const pwaBanner = document.getElementById('pwaInstallBanner') || document.querySelector('.install-banner');
-const btnInstallApp = document.getElementById('btnInstallApp') || document.querySelector('.install-banner button');
+const pwaInstallBanner = document.getElementById('pwaInstallBanner');
+const btnInstallPwa = document.getElementById('btnInstallPwa');
+const btnClosePwaBanner = document.getElementById('btnClosePwaBanner');
 
 // 1. Register Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then((reg) => console.log('VYORA SW Registered successfully:', reg.scope))
-      .catch((err) => console.log('VYORA SW Registration failed:', err));
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('VYORA SW Registered:', reg.scope))
+      .catch(err => console.log('ServiceWorker registration skipped:', err));
   });
 }
 
 // 2. Capture Chrome Install Prompt
 window.addEventListener('beforeinstallprompt', (e) => {
-  // Prevent mini-infobar from appearing automatically
   e.preventDefault();
   deferredPrompt = e;
 
-  // Make sure top banner is visible
-  if (pwaBanner) {
-    pwaBanner.style.display = 'flex';
+  // Show banner only if customer hasn't dismissed it during this visit
+  if (pwaInstallBanner && !sessionStorage.getItem('vyora_pwa_dismissed')) {
+    pwaInstallBanner.style.display = 'flex';
   }
 });
 
-// 3. Trigger Native Install Dialog on Button Click
-if (btnInstallApp) {
-  btnInstallApp.addEventListener('click', async () => {
+// 3. Handle Install Button Tap
+if (btnInstallPwa) {
+  btnInstallPwa.addEventListener('click', async () => {
     if (!deferredPrompt) {
-      alert("To install VYORA:\n• On Android Chrome: Tap the top-right 3 dots ⋮ > 'Add to Home screen'\n• On iPhone Safari: Tap the Share icon ⎋ > 'Add to Home Screen'");
+      alert("To install VYORA:\n• On Android Chrome: Tap ⋮ (top-right menu) > 'Add to Home screen'\n• On iPhone Safari: Tap Share (⎋) > 'Add to Home Screen'");
       return;
     }
 
-    // Show native prompt
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    
+
     if (outcome === 'accepted') {
-      console.log('User installed VYORA to home screen');
-      if (pwaBanner) pwaBanner.style.display = 'none';
+      if (pwaInstallBanner) pwaInstallBanner.style.display = 'none';
     }
     deferredPrompt = null;
   });
 }
 
-// 4. Hide Banner Once Installed
+// 4. Handle Close Button Tap
+if (btnClosePwaBanner) {
+  btnClosePwaBanner.addEventListener('click', () => {
+    if (pwaInstallBanner) pwaInstallBanner.style.display = 'none';
+    sessionStorage.setItem('vyora_pwa_dismissed', 'true');
+  });
+}
+
+// 5. Hide Banner After Successful Installation
 window.addEventListener('appinstalled', () => {
-  console.log('VYORA successfully installed');
-  if (pwaBanner) pwaBanner.style.display = 'none';
+  if (pwaInstallBanner) pwaInstallBanner.style.display = 'none';
   deferredPrompt = null;
 });
