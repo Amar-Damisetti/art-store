@@ -1673,3 +1673,288 @@ function updateCareGuideForProduct(product) {
     `;
   }
 }
+// ==========================================================================
+// 🛒 MULTI-ITEM SHOPPING CART & COMBINED CHECKOUT ENGINE
+// ==========================================================================
+
+let vyoraCart = JSON.parse(localStorage.getItem('vyora_shopping_cart') || '[]');
+let isCartCheckoutMode = false;
+
+function saveCartToStorage() {
+  localStorage.setItem('vyora_shopping_cart', JSON.stringify(vyoraCart));
+  updateFloatingCartBadge();
+}
+
+function updateFloatingCartBadge() {
+  const pill = document.getElementById('floatingCartBtn');
+  const countEl = document.getElementById('floatingCartCount');
+  if (!pill || !countEl) return;
+
+  const totalQty = vyoraCart.reduce((sum, item) => sum + item.qty, 0);
+  countEl.textContent = totalQty;
+  pill.style.display = totalQty > 0 ? 'flex' : 'none';
+}
+
+function addCurrentProductToCart() {
+  if (!currentActiveProduct) return;
+
+  const unitPrice = parseInt((currentActiveProduct.discountPrice || '0').replace(/[^0-9]/g, '')) || 0;
+  const blueprint = liveSummaryText ? liveSummaryText.textContent : 'Standard Configuration';
+  const note = customPersonalNote ? customPersonalNote.value.trim() : '';
+
+  // Check if exact same product + customization already exists in cart
+  const existingIndex = vyoraCart.findIndex(
+    item => item.id === currentActiveProduct.id && item.customization === blueprint
+  );
+
+  if (existingIndex > -1) {
+    vyoraCart[existingIndex].qty += 1;
+  } else {
+    vyoraCart.push({
+      id: currentActiveProduct.id,
+      title: currentActiveProduct.title,
+      category: `${currentActiveProduct.mainCategoryName} (${currentActiveProduct.subCategoryName})`,
+      unitPrice: unitPrice,
+      qty: 1,
+      customization: blueprint,
+      note: note,
+      image: (currentActiveProduct.images && currentActiveProduct.images[0]) || 'images/logo1.png'
+    });
+  }
+
+  saveCartToStorage();
+  if (productModal) productModal.classList.remove('active');
+  openCartDrawer();
+}
+
+function openCartDrawer() {
+  renderCartDrawerItems();
+  const drawer = document.getElementById('cartDrawerModal');
+  if (drawer) drawer.classList.add('active');
+}
+
+function closeCartDrawer() {
+  const drawer = document.getElementById('cartDrawerModal');
+  if (drawer) drawer.classList.remove('active');
+}
+
+function changeCartItemQty(index, delta) {
+  if (!vyoraCart[index]) return;
+  vyoraCart[index].qty += delta;
+  if (vyoraCart[index].qty <= 0) {
+    vyoraCart.splice(index, 1);
+  }
+  saveCartToStorage();
+  renderCartDrawerItems();
+}
+
+function renderCartDrawerItems() {
+  const container = document.getElementById('cartItemsContainer');
+  const subtotalEl = document.getElementById('cartDrawerSubtotal');
+  const checkoutBtn = document.getElementById('proceedCartCheckoutBtn');
+  if (!container) return;
+
+  if (vyoraCart.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding: 30px 10px; color:#888; font-size:0.9rem;">Your cart is empty. Pick any art piece, cookie box, or chocolate to add!</div>`;
+    if (subtotalEl) subtotalEl.textContent = '₹0';
+    if (checkoutBtn) checkoutBtn.style.display = 'none';
+    return;
+  }
+
+  if (checkoutBtn) checkoutBtn.style.display = 'block';
+  let subtotal = 0;
+  container.innerHTML = '';
+
+  vyoraCart.forEach((item, idx) => {
+    const lineTotal = item.unitPrice * item.qty;
+    subtotal += lineTotal;
+
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; gap:10px; align-items:center; background:#fff8f9; border:1px solid #ffccd5; border-radius:12px; padding:10px;';
+    row.innerHTML = `
+      <img src="${item.image}" alt="${item.title}" onerror="this.src='images/logo1.png'" style="width:52px; height:52px; border-radius:8px; object-fit:cover; flex-shrink:0;">
+      <div style="flex:1; min-width:0;">
+        <div style="font-size:0.86rem; font-weight:700; color:#22223b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</div>
+        <div style="font-size:0.72rem; color:#ff3366; font-weight:600;">${item.customization}</div>
+        <div style="font-size:0.82rem; font-weight:700; color:#059669; margin-top:2px;">₹${item.unitPrice} × ${item.qty} = ₹${lineTotal}</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px; background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:3px 6px;">
+        <button type="button" onclick="changeCartItemQty(${idx}, -1)" style="border:none; background:none; font-weight:800; color:#ff3366; cursor:pointer; padding:2px 6px;">−</button>
+        <span style="font-size:0.84rem; font-weight:700; color:#22223b;">${item.qty}</span>
+        <button type="button" onclick="changeCartItemQty(${idx}, 1)" style="border:none; background:none; font-weight:800; color:#059669; cursor:pointer; padding:2px 6px;">+</button>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+
+  if (subtotalEl) subtotalEl.textContent = `₹${subtotal.toLocaleString('en-IN')}`;
+}
+
+// Wire Add to Cart button inside Product Quick-View Modal
+const addToCartModalBtn = document.getElementById('addToCartModalBtn');
+if (addToCartModalBtn) {
+  addToCartModalBtn.addEventListener('click', addCurrentProductToCart);
+}
+
+// Reset cart mode when single-item Buy Now is clicked
+if (openCheckoutModalBtn) {
+  openCheckoutModalBtn.addEventListener('click', () => {
+    isCartCheckoutMode = false;
+  }, true);
+}
+
+// Proceed to Checkout from Cart Drawer
+const proceedCartCheckoutBtn = document.getElementById('proceedCartCheckoutBtn');
+if (proceedCartCheckoutBtn) {
+  proceedCartCheckoutBtn.addEventListener('click', () => {
+    if (vyoraCart.length === 0) return;
+    isCartCheckoutMode = true;
+    closeCartDrawer();
+
+    const totalItems = vyoraCart.reduce((sum, i) => sum + i.qty, 0);
+    const itemsListSummary = vyoraCart.map(i => `${i.qty}x ${i.title}`).join(', ');
+    const customSummary = vyoraCart.map(i => `${i.title}: ${i.customization}`).join(' | ');
+
+    if (modalArtTitle) modalArtTitle.textContent = `Combined Cart (${totalItems} Items)`;
+    if (modalArtCategory) modalArtCategory.textContent = itemsListSummary;
+    if (modalCustomChoicePreview) modalCustomChoicePreview.textContent = customSummary;
+
+    if (checkoutFormView) checkoutFormView.style.display = 'block';
+    if (paymentVerifyingView) paymentVerifyingView.style.display = 'none';
+    if (orderSuccessView) orderSuccessView.style.display = 'none';
+
+    const codRadio = document.querySelector('input[name="paymentMethod"][value="COD"]');
+    if (codRadio) codRadio.checked = true;
+    if (checkoutUpiPanel) checkoutUpiPanel.style.display = 'none';
+    if (mainSubmitOrderBtn) {
+      mainSubmitOrderBtn.style.display = 'block';
+      mainSubmitOrderBtn.disabled = false;
+      mainSubmitOrderBtn.textContent = 'Confirm & Place Order (Cash on Delivery) 🛍️';
+    }
+
+    recalculateCheckoutTotals();
+    if (orderModal) orderModal.classList.add('active');
+  });
+}
+
+// Upgrade total & discount calculator so BOTH single-item and multi-item cart work seamlessly
+const _originalRecalculate = recalculateCheckoutTotals;
+recalculateCheckoutTotals = function() {
+  if (!isCartCheckoutMode) {
+    _originalRecalculate();
+    applyActiveDiscountToSummary();
+    return;
+  }
+
+  const itemPriceNum = vyoraCart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0);
+  const deliveryFeeNum = parseInt(deliveryZoneSelect ? deliveryZoneSelect.value : '70') || 0;
+  const giftWrapCheck = document.getElementById('giftWrapCheck');
+  const giftWrapFee = (giftWrapCheck && giftWrapCheck.checked) ? 50 : 0;
+
+  currentCalculatedTotal = itemPriceNum + deliveryFeeNum + giftWrapFee;
+
+  if (summaryItemPrice) summaryItemPrice.textContent = `₹${itemPriceNum.toLocaleString('en-IN')}`;
+  if (summaryDeliveryFee) summaryDeliveryFee.textContent = deliveryFeeNum === 0 ? 'FREE' : `+₹${deliveryFeeNum}`;
+  if (summaryGrandTotal) summaryGrandTotal.textContent = `₹${currentCalculatedTotal.toLocaleString('en-IN')}`;
+  if (modalArtPrice) modalArtPrice.textContent = `₹${currentCalculatedTotal.toLocaleString('en-IN')}`;
+
+  applyActiveDiscountToSummary();
+
+  const tempOrderRef = "VY-" + Math.floor(100000 + Math.random() * 900000);
+  const upiDeepLink = `upi://pay?pa=${encodeURIComponent(CIY_UPI_ID)}&pn=${encodeURIComponent(CIY_UPI_NAME)}&am=${currentCalculatedTotal}&cu=INR&tn=${encodeURIComponent(tempOrderRef)}`;
+  if (formUpiQrImg) {
+    formUpiQrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=8&data=${encodeURIComponent(upiDeepLink)}`;
+  }
+};
+
+function applyActiveDiscountToSummary() {
+  const discountRow = document.getElementById('discountRow');
+  const discountDisplay = document.getElementById('discountValueDisplay');
+  if (!activeAppliedPromo) {
+    if (discountRow) discountRow.style.display = 'none';
+    return;
+  }
+
+  let discountAmount = 0;
+  if (activeAppliedPromo.type === 'percent') {
+    discountAmount = Math.round((currentCalculatedTotal * activeAppliedPromo.value) / 100);
+  } else if (activeAppliedPromo.type === 'flat') {
+    discountAmount = activeAppliedPromo.value;
+  }
+
+  currentCalculatedTotal = Math.max(0, currentCalculatedTotal - discountAmount);
+
+  if (discountRow && discountDisplay) {
+    discountDisplay.textContent = `-₹${discountAmount}`;
+    discountRow.style.display = discountAmount > 0 ? 'flex' : 'none';
+  }
+  if (summaryGrandTotal) summaryGrandTotal.textContent = `₹${currentCalculatedTotal.toLocaleString('en-IN')}`;
+  if (modalArtPrice) modalArtPrice.textContent = `₹${currentCalculatedTotal.toLocaleString('en-IN')}`;
+}
+
+calculateCheckoutDiscount = function() {
+  recalculateCheckoutTotals();
+};
+
+// Upgrade order data collector to bundle all cart items into the receipt & Google Sheet
+const _originalCollectOrder = collectCurrentOrderData;
+collectCurrentOrderData = function(paymentMode) {
+  if (!isCartCheckoutMode) {
+    return _originalCollectOrder(paymentMode);
+  }
+
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const street = document.getElementById('custStreet').value.trim();
+  const city = document.getElementById('custCity').value.trim();
+  const pincode = document.getElementById('custPincode').value.trim();
+  const mapLink = custGpsMapLink ? custGpsMapLink.value : '';
+
+  const orderId = "VY-" + Math.floor(100000 + Math.random() * 900000);
+  const itemsCombinedTitle = vyoraCart.map(i => `${i.qty}x ${i.title}`).join(' + ');
+  const categoriesCombined = [...new Set(vyoraCart.map(i => i.category))].join(', ');
+  const customCombined = vyoraCart.map(i => `[${i.title}: ${i.customization}]`).join(' | ');
+  const customMessageInput = document.getElementById('orderCustomMessage');
+  const checkoutNote = customMessageInput ? customMessageInput.value.trim() : '';
+
+  const itemSubtotal = vyoraCart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0);
+  const deliveryFeeNum = parseInt(deliveryZoneSelect ? deliveryZoneSelect.value : '70') || 0;
+  const selectedOption = deliveryZoneSelect ? deliveryZoneSelect.options[deliveryZoneSelect.selectedIndex] : null;
+  const zoneName = selectedOption ? (selectedOption.getAttribute('data-name') || 'Courier') : 'Courier';
+  const isGiftWrap = document.getElementById('giftWrapCheck') ? document.getElementById('giftWrapCheck').checked : false;
+
+  return {
+    orderId: orderId,
+    status: 'Pending',
+    customDeliveryDate: '',
+    item: itemsCombinedTitle,
+    category: categoriesCombined,
+    customSelection: checkoutNote ? `${customCombined} | Checkout Note: ${checkoutNote}` : customCombined,
+    specialNotes: checkoutNote || 'Combined Cart Order',
+    giftWrap: isGiftWrap,
+    itemPrice: `₹${itemSubtotal}`,
+    deliveryFee: `₹${deliveryFeeNum}`,
+    deliveryZone: zoneName,
+    price: `₹${currentCalculatedTotal}`,
+    customerName: name,
+    phone: phone,
+    address: `${street}, ${city} - ${pincode}`,
+    googleMapsLink: mapLink,
+    payment: paymentMode,
+    orderDate: new Date().toLocaleDateString('en-IN')
+  };
+};
+
+// Clear cart automatically once a combined order is finalized
+const _originalFinalize = finalizeAndShowReceipt;
+finalizeAndShowReceipt = function(orderData) {
+  _originalFinalize(orderData);
+  if (isCartCheckoutMode) {
+    vyoraCart = [];
+    saveCartToStorage();
+    isCartCheckoutMode = false;
+  }
+};
+
+// Initialize floating cart pill on page load
+updateFloatingCartBadge();

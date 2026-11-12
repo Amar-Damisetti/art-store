@@ -143,6 +143,38 @@
     </a>
   </nav>
 
+  <!-- Floating Cart Pill (Bottom Right above WhatsApp) -->
+  <button type="button" id="floatingCartBtn" onclick="openCartDrawer()" style="display: none; position: fixed; bottom: 145px; right: 20px; z-index: 9998; background: linear-gradient(135deg, #22223b, #4a4e69); color: #ffffff; border: 2px solid #ffccd5; border-radius: 50px; padding: 11px 18px; font-weight: 700; font-size: 0.88rem; box-shadow: 0 8px 25px rgba(0,0,0,0.22); cursor: pointer; align-items: center; gap: 8px;">
+    <span>🛒 Cart</span>
+    <span id="floatingCartCount" style="background: #ff3366; color: #fff; border-radius: 50%; padding: 2px 8px; font-size: 0.78rem;">0</span>
+  </button>
+
+  <!-- Slide-Out Cart Drawer Overlay -->
+  <div class="modal-overlay" id="cartDrawerModal">
+    <div class="modal-box" style="max-width: 480px; width: 95%; max-height: 88vh; display: flex; flex-direction: column; padding: 22px; border-radius: 20px; background: #fff;">
+      <button type="button" class="close-btn" onclick="closeCartDrawer()">&times;</button>
+      
+      <div style="border-bottom: 1.5px solid #f3f4f6; padding-bottom: 12px; margin-bottom: 12px;">
+        <span style="font-size: 0.74rem; font-weight: 700; color: #ff3366; text-transform: uppercase;">YOUR SHOPPING BAG</span>
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.45rem; color: #22223b;">Combined Order Cart</h3>
+      </div>
+
+      <div id="cartItemsContainer" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; margin-bottom: 14px;">
+        <!-- Cart items render here dynamically -->
+      </div>
+
+      <div style="border-top: 1.5px dashed #e5e7eb; padding-top: 12px;">
+        <div style="display: flex; justify-content: space-between; font-size: 1rem; font-weight: 700; color: #22223b; margin-bottom: 12px;">
+          <span>Cart Subtotal:</span>
+          <span id="cartDrawerSubtotal" style="color: #059669;">₹0</span>
+        </div>
+        <button type="button" id="proceedCartCheckoutBtn" class="btn-primary" style="width: 100%; padding: 13px; font-size: 0.96rem; border: none; cursor: pointer;">
+          Proceed to Combined Checkout 🛍️
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Floating WhatsApp Quick-Chat Bubble -->
   <a href="https://wa.me/919491396383?text=Hi%20VYORA!%20I%20am%20browsing%20your%20website%20and%20had%20a%20few%20questions%20about%20a%20custom%20order." 
      class="floating-whatsapp-bubble" 
@@ -442,6 +474,21 @@
           </div>
 
           <div style="display:flex; flex-direction:column; gap:8px;">
+            <!-- Find this section in index.html -->
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <!-- 👇 PASTE THIS NEW BUTTON RIGHT HERE 👇 -->
+            <button type="button" id="addToCartModalBtn" style="width:100%; padding:13px; font-size:0.95rem; font-weight:700; background:#fff0f3; color:#ff3366; border:1.5px solid #ff3366; border-radius:12px; cursor:pointer;">
+              🛒 Add to Cart (Combine Items)
+            </button>
+            <!-- 👆 END OF NEW BUTTON 👆 -->
+
+            <button type="button" class="btn-primary" id="openCheckoutModalBtn" style="width:100%; padding:14px; border:none; cursor:pointer;">
+              ⚡ Buy Now (Instant Single Checkout)
+            </button>
+            <button type="button" id="whatsappChatOnlyBtn" style="width:100%; padding:11px; font-size:0.88rem; font-weight:600; background:#f0fdf4; color:#15803d; border:1.5px solid #bbf7d0; border-radius:12px; cursor:pointer;">
+              💬 Chat on WhatsApp First
+            </button>
+          </div>
             <button type="button" class="btn-primary" id="openCheckoutModalBtn" style="width:100%; padding:14px; border:none; cursor:pointer;">
               ⚡ Buy Now (Enter Address & Payment)
             </button>
