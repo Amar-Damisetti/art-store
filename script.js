@@ -1354,7 +1354,13 @@ if (reviewSubmissionForm) {
     const existing = getStoredReviews();
     existing.unshift(newReview); // Put newest review at top
     localStorage.setItem('vyora_customer_reviews', JSON.stringify(existing));
-
+    // Sync new review to Google Sheet
+    fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: 'addReview', review: newReview })
+    }).catch(err => console.error("Review cloud sync failed:", err));
     renderReviews();
     reviewSubmissionForm.reset();
     reviewSubmissionForm.style.display = 'none';
@@ -1957,3 +1963,29 @@ finalizeAndShowReceipt = function(orderData) {
 
 // Initialize floating cart pill on page load
 updateFloatingCartBadge();
+// ==========================================================================
+// ☁️ AUTO-SYNC STOREFRONT CATALOG & REVIEWS FROM GOOGLE SHEETS
+// ==========================================================================
+async function syncStorefrontFromCloud() {
+  if (!GOOGLE_SHEET_WEBHOOK_URL) return;
+  try {
+    const res = await fetch(GOOGLE_SHEET_WEBHOOK_URL);
+    const data = await res.json();
+
+    if (data && data.result === 'success') {
+      if (Array.isArray(data.products) && data.products.length > 0) {
+        localStorage.setItem('ciy_products', JSON.stringify(data.products));
+        localStorage.setItem('ciy_sync_stamp', CATALOG_SYNC_KEY);
+        renderProductGrid();
+      }
+      if (Array.isArray(data.reviews) && data.reviews.length > 0) {
+        localStorage.setItem('vyora_customer_reviews', JSON.stringify(data.reviews));
+        renderReviews();
+      }
+    }
+  } catch (err) {
+    console.log('Using cached storefront catalog & reviews');
+  }
+}
+
+syncStorefrontFromCloud();

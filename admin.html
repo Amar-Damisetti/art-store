@@ -1050,33 +1050,42 @@
         const res = await fetch(GOOGLE_SHEET_WEBHOOK_URL);
         const data = await res.json();
 
-        if (data && data.result === 'success' && Array.isArray(data.orders)) {
-          const localOrders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
-          const mergedMap = new Map();
+if (data && data.result === 'success') {
+          // 1. Merge Orders
+          if (Array.isArray(data.orders)) {
+            const localOrders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
+            const mergedMap = new Map();
 
-          // Load existing local orders first
-          localOrders.forEach(o => {
-            if (o.orderId) mergedMap.set(o.orderId, o);
-          });
+            localOrders.forEach(o => { if (o.orderId) mergedMap.set(o.orderId, o); });
+            data.orders.forEach(cloudOrder => {
+              if (!cloudOrder.orderId) return;
+              if (mergedMap.has(cloudOrder.orderId)) {
+                const existing = mergedMap.get(cloudOrder.orderId);
+                existing.status = cloudOrder.status || existing.status;
+                mergedMap.set(cloudOrder.orderId, existing);
+              } else {
+                mergedMap.set(cloudOrder.orderId, cloudOrder);
+              }
+            });
 
-          // Merge cloud orders from Google Sheet (cloud status overrides if updated)
-          data.orders.forEach(cloudOrder => {
-            if (!cloudOrder.orderId) return;
-            if (mergedMap.has(cloudOrder.orderId)) {
-              const existing = mergedMap.get(cloudOrder.orderId);
-              existing.status = cloudOrder.status || existing.status;
-              mergedMap.set(cloudOrder.orderId, existing);
-            } else {
-              mergedMap.set(cloudOrder.orderId, cloudOrder);
-            }
-          });
+            localStorage.setItem('vyora_orders', JSON.stringify(Array.from(mergedMap.values())));
+            loadAdminDashboard();
+          }
 
-          const mergedList = Array.from(mergedMap.values());
-          localStorage.setItem('ciy_orders', JSON.stringify(mergedList));
-          loadAdminDashboard();
+          // 2. Sync Cloud Products (if sheet has products)
+          if (Array.isArray(data.products) && data.products.length > 0) {
+            localStorage.setItem('vyora_products', JSON.stringify(data.products));
+            loadArtworksTable();
+          }
+
+          // 3. Sync Cloud Reviews (if sheet has reviews)
+          if (Array.isArray(data.reviews) && data.reviews.length > 0) {
+            localStorage.setItem('vyora_customer_reviews', JSON.stringify(data.reviews));
+            loadAdminReviewsTable();
+          }
 
           if (showAlert) {
-            alert(`✅ Synced ${data.orders.length} cloud orders from Google Sheets!`);
+            alert(`✅ Synced ${data.orders.length} orders, ${data.products ? data.products.length : 0} products & ${data.reviews ? data.reviews.length : 0} reviews!`);
           }
         }
       } catch (err) {
@@ -1288,7 +1297,8 @@
         alert(`"${title}" added to your catalog!`);
       }
 
-      localStorage.setItem('ciy_products', JSON.stringify(products));
+      localStorage.setItem('vyora_products', JSON.stringify(products));
+      syncProductsToCloud(products);
       resetFormMode();
       loadArtworksTable();
     });
@@ -1297,10 +1307,19 @@
       const products = getArtworks();
       if (confirm(`Remove "${products[index].title}"?`)) {
         products.splice(index, 1);
-        localStorage.setItem('ciy_products', JSON.stringify(products));
+        localStorage.setItem('vyora_products', JSON.stringify(products));
+        syncProductsToCloud(products);
         loadArtworksTable();
       }
     };
+    function syncProductsToCloud(productsList) {
+      fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: 'syncProducts', products: productsList })
+      }).catch(err => console.error("Product cloud sync failed:", err));
+    }
 
     // ==========================================================================
     // ✍️ OFFLINE / MANUAL PHONE ORDER SYSTEM
@@ -1853,6 +1872,12 @@ function renderOrderRow(order) {
       if (confirm(`Are you sure you want to delete the review by "${target.author}"?\n\nComment: "${target.comment}"`)) {
         reviews.splice(index, 1);
         localStorage.setItem('vyora_customer_reviews', JSON.stringify(reviews));
+        fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: 'syncReviews', reviews: reviews })
+        }).catch(err => console.error("Review cloud sync failed:", err));
         alert("✅ Review deleted successfully!");
         loadAdminReviewsTable();
       }
