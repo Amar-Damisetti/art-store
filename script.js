@@ -1023,12 +1023,11 @@ function executeOrderTrack(query) {
 
   if (trackErrorMsg) trackErrorMsg.style.display = 'none';
 
-  const status = matched.status || 'Pending';
-  let stageText = "Order Received & Verified";
-  if (status === 'Crafting') stageText = "Artisan is Crafting / Baking Your Order";
-  else if (status === 'Shipped') stageText = "Dispatched via Safe Courier";
-  else if (status === 'Delivered') stageText = "Delivered to Doorstep";
-
+ const status = matched.status || 'Pending';
+  let stageText = "🟡 Pending — Order Received & Verified";
+  if (status === 'Crafting') stageText = "In Preparation 🎨 — Artisan is Crafting / Baking Your Order";
+  else if (status === 'Shipped') stageText = "Shipped 🚚 — Carefully Packed & Dispatched";
+  else if (status === 'Delivered') stageText = "Completed ✅ — Delivered to Doorstep";
   const mapLinkTrackSnippet = matched.googleMapsLink ? 
     `<p><strong>Doorstep Pin:</strong> <a href="${matched.googleMapsLink}" target="_blank" style="color:#0284c7; font-weight:600;">📍 Open Navigation Map</a></p>` : '';
 

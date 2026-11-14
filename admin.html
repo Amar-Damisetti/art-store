@@ -519,11 +519,6 @@
             <th>Customer Info</th>
             <th>Shipping Address & Maps</th>
             <th>Actions</th>
-            <th>Customers</th>
-            <th>Items</th>
-            <th>Customization & Photo</th>
-            <th>Total</th>
-            <th>Status</th>
           </tr>
         </thead>
         <tbody id="ordersTbody"></tbody>
@@ -1530,6 +1525,38 @@ function renderOrderRow(order) {
   `;
 }
 
+ window.updateOrderStatusDirect = function(orderIndex, newStatus) {
+      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      if (!orders[orderIndex]) return;
+
+      orders[orderIndex].status = newStatus;
+      localStorage.setItem('ciy_orders', JSON.stringify(orders));
+      renderOrdersTableRows();
+
+      if (newStatus === 'Shipped') {
+        if (confirm(`Order ${orders[orderIndex].orderId} marked as Shipped 🚚!\n\nSend the dispatch & tracking message to ${orders[orderIndex].customerName} on WhatsApp now?`)) {
+          sendDispatchWhatsApp(orderIndex);
+        }
+      }
+    };
+
+    window.sendDispatchWhatsApp = function(orderIndex) {
+      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      const o = orders[orderIndex];
+      if (!o) return;
+
+      const phoneRaw = (o.phone || '').replace(/[^0-9]/g, '');
+      const phoneClean = phoneRaw.length === 10 ? '91' + phoneRaw : phoneRaw;
+
+      const origin = window.location.origin;
+      const pathname = window.location.pathname.replace('admin.html', 'index.html');
+      const trackingLink = `${origin}${pathname}?track=${o.orderId}`;
+
+      const msg = `Hi ${o.customerName}, great news! Your VYORA order ${o.orderId} (${o.item}) has been carefully packed and dispatched! 🚚✨\n\nHere is your live tracking info:\n${trackingLink}\n\nThank you for shopping with VYORA! ❤️`;
+
+      window.open(`https://wa.me/${phoneClean}?text=${encodeURIComponent(msg)}`, '_blank');
+    };
+
     function renderOrdersTableRows() {
       const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
       const tbody = document.getElementById('ordersTbody');
@@ -1555,11 +1582,7 @@ function renderOrderRow(order) {
       });
 
       if (searchMatchText) {
-        if (query) {
-          searchMatchText.textContent = `Showing ${filtered.length} of ${orders.length} orders`;
-        } else {
-          searchMatchText.textContent = '';
-        }
+        searchMatchText.textContent = query ? `Showing ${filtered.length} of ${orders.length} orders` : '';
       }
 
       if (filtered.length === 0) {
@@ -1569,6 +1592,27 @@ function renderOrderRow(order) {
 
       filtered.forEach(({ order, originalIndex }) => {
         const tr = document.createElement('tr');
+        const currentStatus = order.status || 'Pending';
+
+        let selectStyle = 'background:#fef3c7; color:#b45309; border:1px solid #fde68a;';
+        if (currentStatus === 'Crafting') selectStyle = 'background:#ffedd5; color:#c2410c; border:1px solid #fed7aa;';
+        else if (currentStatus === 'Shipped') selectStyle = 'background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd;';
+        else if (currentStatus === 'Delivered') selectStyle = 'background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;';
+
+        const statusDropdownHtml = `
+          <div style="display:flex; align-items:center; gap:6px;">
+            <select onchange="updateOrderStatusDirect(${originalIndex}, this.value)" style="${selectStyle} padding:6px 8px; border-radius:20px; font-size:0.78rem; font-weight:700; cursor:pointer; width:auto;">
+              <option value="Pending" ${currentStatus === 'Pending' ? 'selected' : ''}>Pending</option>
+              <option value="Crafting" ${currentStatus === 'Crafting' ? 'selected' : ''}>In Preparation 🎨</option>
+              <option value="Shipped" ${currentStatus === 'Shipped' ? 'selected' : ''}>Shipped 🚚</option>
+              <option value="Delivered" ${currentStatus === 'Delivered' ? 'selected' : ''}>Completed ✅</option>
+            </select>
+            <button type="button" onclick="sendDispatchWhatsApp(${originalIndex})" title="Send Dispatch & Tracking on WhatsApp" style="background:#25d366; color:#fff; border:none; border-radius:8px; padding:6px 9px; font-size:0.8rem; font-weight:700; cursor:pointer; white-space:nowrap;">
+              📲 Notify
+            </button>
+          </div>
+        `;
+
         const deliveryDisplay = order.customDeliveryDate ? 
           `<strong style="color:#059669;">${order.customDeliveryDate}</strong>` : 
           `<span style="color:#9ca3af; font-size:0.8rem;">Auto-scheduled</span>`;
@@ -1579,7 +1623,7 @@ function renderOrderRow(order) {
         tr.innerHTML = `
           <td>${order.orderDate || '-'}</td>
           <td><strong>${order.orderId || '-'}</strong></td>
-          <td>${getStatusBadge(order.status)}</td>
+          <td>${statusDropdownHtml}</td>
           <td>${deliveryDisplay}</td>
           <td>${order.item || 'Item'}</td>
           <td><strong style="color:#ff3366;">${order.customSelection || 'Standard'}</strong></td>
