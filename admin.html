@@ -459,6 +459,7 @@
         </div>
       </div>
       <div class="header-actions">
+        <button class="btn" id="syncCloudOrdersBtn" onclick="syncOrdersFromGoogleSheet(true)" style="background: #e0f2fe; color: #0284c7;">🔄 Sync Cloud Orders</button>
         <button class="btn btn-manual-order" id="openManualOrderModalBtn">✍️ + Log Offline Order</button>
         <button class="btn btn-export" id="exportBtn">📥 Export CSV</button>
         <button class="btn btn-logout" id="logoutBtn">🔒 Lock</button>
@@ -901,7 +902,7 @@
     const ADMIN_SECRET_PIN = "1234";
 
     // 👉 PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE (For syncing offline orders to Google Sheet):
-    const GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/PASTE_YOUR_WEB_APP_URL_HERE/exec";
+    const GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzHfZ1iBj5eNPNeZi_hBTSLijoKjAnsFTbd0m54dS5fFxYAhYDdD9M2w4ezQJjI5vFVUg/exec";
 
     const defaultStarterProducts = [
       {
@@ -1039,6 +1040,51 @@
       loadArtworksTable();
       loadAdminReviewsTable();
       loadAdminPromoSettings();
+      syncOrdersFromGoogleSheet(false);
+    }
+    async function syncOrdersFromGoogleSheet(showAlert) {
+      const syncBtn = document.getElementById('syncCloudOrdersBtn');
+      if (syncBtn) syncBtn.textContent = '⏳ Syncing...';
+
+      try {
+        const res = await fetch(GOOGLE_SHEET_WEBHOOK_URL);
+        const data = await res.json();
+
+        if (data && data.result === 'success' && Array.isArray(data.orders)) {
+          const localOrders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+          const mergedMap = new Map();
+
+          // Load existing local orders first
+          localOrders.forEach(o => {
+            if (o.orderId) mergedMap.set(o.orderId, o);
+          });
+
+          // Merge cloud orders from Google Sheet (cloud status overrides if updated)
+          data.orders.forEach(cloudOrder => {
+            if (!cloudOrder.orderId) return;
+            if (mergedMap.has(cloudOrder.orderId)) {
+              const existing = mergedMap.get(cloudOrder.orderId);
+              existing.status = cloudOrder.status || existing.status;
+              mergedMap.set(cloudOrder.orderId, existing);
+            } else {
+              mergedMap.set(cloudOrder.orderId, cloudOrder);
+            }
+          });
+
+          const mergedList = Array.from(mergedMap.values());
+          localStorage.setItem('ciy_orders', JSON.stringify(mergedList));
+          loadAdminDashboard();
+
+          if (showAlert) {
+            alert(`✅ Synced ${data.orders.length} cloud orders from Google Sheets!`);
+          }
+        }
+      } catch (err) {
+        console.error('Cloud sync failed:', err);
+        if (showAlert) alert('⚠️ Could not reach Google Sheet. Check your internet connection.');
+      } finally {
+        if (syncBtn) syncBtn.textContent = '🔄 Sync Cloud Orders';
+      }
     }
 
     loginForm.addEventListener('submit', (e) => {
@@ -1531,6 +1577,12 @@ function renderOrderRow(order) {
 
       orders[orderIndex].status = newStatus;
       localStorage.setItem('ciy_orders', JSON.stringify(orders));
+      fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: 'updateStatus', orderId: orders[orderIndex].orderId, status: newStatus })
+      }).catch(() => {});
       renderOrdersTableRows();
 
       if (newStatus === 'Shipped') {
