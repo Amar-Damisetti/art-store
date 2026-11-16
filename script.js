@@ -616,6 +616,16 @@ if (detailQtyPlusBtn && detailQtyDisplay) {
     updateLiveCustomSummary();
   });
 }
+if (customPersonalNote) customPersonalNote.addEventListener('input', updateLiveCustomSummary);
+document.querySelectorAll('input[name="artLightGlow"]').forEach(radio => {
+  radio.addEventListener('change', updateLiveCustomSummary);
+});
+
+if (closeProductModal) {
+  closeProductModal.addEventListener('click', () => {
+    productModal.classList.remove('active');
+  });
+}
 // GPS Current Location
 const btnGetLocation = document.getElementById('btnGetLocation');
 const locationNotice = document.getElementById('locationNotice');
@@ -818,7 +828,7 @@ function collectCurrentOrderData(paymentMode) {
     orderId: orderId,
     status: 'Pending',
     customDeliveryDate: '',
-    item: `${selectedModalQty > 1 ? selectedModalQty + 'x ' : ''}${currentActiveProduct.title}${selectedPackOption ? ' (' + selectedPackOption.label + ')' : ''}`,,
+    item: `${selectedModalQty > 1 ? selectedModalQty + 'x ' : ''}${currentActiveProduct.title}${selectedPackOption ? ' (' + selectedPackOption.label + ')' : ''}`,
     category: categoryInfo,
     customSelection: customOrderText ? `${customBlueprint} | Note: ${customOrderText}` : customBlueprint,
     customOrderText: customOrderText,
