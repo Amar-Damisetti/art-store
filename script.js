@@ -254,7 +254,22 @@ function renderProductGrid() {
 
   const filtered = products.filter(p => {
     if (activeFilter === 'all') return true;
-    return p.subCategory === activeFilter || p.mainCategory === activeFilter;
+
+    const filterKey = activeFilter.toLowerCase();
+    const subCat = (p.subCategory || '').toLowerCase();
+    const subCatName = (p.subCategoryName || '').toLowerCase();
+    const mainCat = (p.mainCategory || '').toLowerCase();
+    const title = (p.title || '').toLowerCase();
+
+    // Match exact category OR any sub-category/title containing the keyword (e.g. "cookie", "choco", "bottle", "resin")
+    const baseWord = filterKey.replace(/_art$/, '').replace(/s$/, '');
+    return (
+      subCat === filterKey ||
+      mainCat === filterKey ||
+      subCat.includes(baseWord) ||
+      subCatName.includes(baseWord) ||
+      title.includes(baseWord)
+    );
   });
 
   if (filtered.length === 0) {
