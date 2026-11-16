@@ -639,6 +639,7 @@ function collectCurrentOrderData(paymentMode) {
     payment: paymentMode,
     orderDate: new Date().toLocaleDateString('en-IN')
   };
+}
 function validateShippingForm() {
   const name = document.getElementById('custName').value.trim();
   const phone = document.getElementById('custPhone').value.trim();
