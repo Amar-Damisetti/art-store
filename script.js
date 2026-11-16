@@ -623,7 +623,10 @@ function collectCurrentOrderData(paymentMode) {
     customDeliveryDate: '',
     item: currentActiveProduct.title,
     category: categoryInfo,
-    customSelection: customBlueprint,
+    customSelection: customOrderText ? `${customBlueprint} | Note: ${customOrderText}` : customBlueprint,
+    customOrderText: customOrderText,
+    customPhoto: customPhotoData,
+    giftWrap: isGiftWrap,
     specialNotes: note,
     itemPrice: `₹${itemPriceNum}`,
     deliveryFee: `₹${deliveryFeeNum}`,
@@ -636,8 +639,6 @@ function collectCurrentOrderData(paymentMode) {
     payment: paymentMode,
     orderDate: new Date().toLocaleDateString('en-IN')
   };
-}
-
 function validateShippingForm() {
   const name = document.getElementById('custName').value.trim();
   const phone = document.getElementById('custPhone').value.trim();
@@ -1623,18 +1624,50 @@ syncStorePromoVisibility();
 let customerAttachedPhotoBase64 = "";
 let giftWrapPrice = 0;
 
-// Preview & Convert customer uploaded image to Base64
+// Preview & Compress customer uploaded image to ~150-200 KB using HTML5 Canvas
 function previewCustomerUploadedImage(input) {
   const file = input.files && input.files[0];
-  if (file) {
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image is larger than 5MB. Please choose a smaller photo or share it via WhatsApp.");
-      input.value = "";
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      customerAttachedPhotoBase64 = e.target.result;
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    alert("Please select a valid image file (JPG, PNG, or WebP).");
+    input.value = "";
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const MAX_DIMENSION = 900; // Keeps width/height crisp at max 900px
+      let width = img.width;
+      let height = img.height;
+
+      if (width > height && width > MAX_DIMENSION) {
+        height = Math.round((height * MAX_DIMENSION) / width);
+        width = MAX_DIMENSION;
+      } else if (height > MAX_DIMENSION) {
+        width = Math.round((width * MAX_DIMENSION) / height);
+        height = MAX_DIMENSION;
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Compress iteratively to stay under ~180 KB
+      let quality = 0.78;
+      let compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+      while (compressedDataUrl.length > 240000 && quality > 0.35) {
+        quality -= 0.1;
+        compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+      }
+
+      customerAttachedPhotoBase64 = compressedDataUrl;
+
       const previewImg = document.getElementById('photoPreviewImg');
       const container = document.getElementById('photoPreviewContainer');
       if (previewImg && container) {
@@ -1642,8 +1675,9 @@ function previewCustomerUploadedImage(input) {
         container.style.display = 'block';
       }
     };
-    reader.readAsDataURL(file);
-  }
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
 }
 
 // Toggle +₹50 Gift wrap in total calculation
