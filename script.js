@@ -1005,11 +1005,49 @@ function openOrderTrackerWithQuery(queryId) {
   executeOrderTrack(queryId);
 }
 
-function executeOrderTrack(query) {
+async function executeOrderTrack(query) {
   const q = (query || (trackInputQuery ? trackInputQuery.value : '')).trim().toLowerCase();
   if (!q) return;
 
-  const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+  if (trackErrorMsg) trackErrorMsg.style.display = 'none';
+  if (searchTrackBtn) {
+    searchTrackBtn.textContent = '⏳ Searching...';
+    searchTrackBtn.disabled = true;
+  }
+
+  let orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+
+  // Fetch live orders from Google Sheet so cross-device & offline admin orders are found
+  if (GOOGLE_SHEET_WEBHOOK_URL) {
+    try {
+      const res = await fetch(GOOGLE_SHEET_WEBHOOK_URL);
+      const data = await res.json();
+      if (data && data.result === 'success' && Array.isArray(data.orders)) {
+        const mergedMap = new Map();
+        orders.forEach(o => { if (o.orderId) mergedMap.set(o.orderId, o); });
+        data.orders.forEach(cloudOrder => {
+          if (!cloudOrder.orderId) return;
+          if (mergedMap.has(cloudOrder.orderId)) {
+            const existing = mergedMap.get(cloudOrder.orderId);
+            existing.status = cloudOrder.status || existing.status;
+            mergedMap.set(cloudOrder.orderId, existing);
+          } else {
+            mergedMap.set(cloudOrder.orderId, cloudOrder);
+          }
+        });
+        orders = Array.from(mergedMap.values());
+        localStorage.setItem('ciy_orders', JSON.stringify(orders));
+      }
+    } catch (err) {
+      console.log('Cloud tracking lookup fallback to local cache');
+    }
+  }
+
+  if (searchTrackBtn) {
+    searchTrackBtn.textContent = 'Track';
+    searchTrackBtn.disabled = false;
+  }
+
   const matched = orders.slice().reverse().find(o => 
     (o.orderId && o.orderId.toLowerCase() === q) || 
     (o.phone && o.phone.replace(/[^0-9]/g, '') === q.replace(/[^0-9]/g, ''))
@@ -1021,13 +1059,12 @@ function executeOrderTrack(query) {
     return;
   }
 
-  if (trackErrorMsg) trackErrorMsg.style.display = 'none';
-
- const status = matched.status || 'Pending';
+  const status = matched.status || 'Pending';
   let stageText = "🟡 Pending — Order Received & Verified";
   if (status === 'Crafting') stageText = "In Preparation 🎨 — Artisan is Crafting / Baking Your Order";
   else if (status === 'Shipped') stageText = "Shipped 🚚 — Carefully Packed & Dispatched";
   else if (status === 'Delivered') stageText = "Completed ✅ — Delivered to Doorstep";
+
   const mapLinkTrackSnippet = matched.googleMapsLink ? 
     `<p><strong>Doorstep Pin:</strong> <a href="${matched.googleMapsLink}" target="_blank" style="color:#0284c7; font-weight:600;">📍 Open Navigation Map</a></p>` : '';
 
