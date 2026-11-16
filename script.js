@@ -1175,8 +1175,19 @@ const btnClosePwaBanner = document.getElementById('btnClosePwaBanner');
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(err => {
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then((reg) => {
+      reg.update();
+    }).catch(err => {
       console.log('ServiceWorker registration skipped:', err);
+    });
+
+    // Automatically reload open storefront when a newly deployed version activates
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) {
+        refreshing = true;
+        window.location.reload();
+      }
     });
   });
 }
@@ -2026,3 +2037,10 @@ async function syncStorefrontFromCloud() {
 }
 
 syncStorefrontFromCloud();
+
+// Re-sync Admin Panel updates whenever customer returns to the storefront tab
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    syncStorefrontFromCloud();
+  }
+});

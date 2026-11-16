@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vyora-v2-app';
+const CACHE_NAME = 'vyora-v3-network-first';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -31,10 +31,22 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Network-First: Always fetch latest code from Vercel; use cache only if offline
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
+
+  // Never cache Google Apps Script live API calls
+  if (event.request.url.includes('script.google.com')) return;
+
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request);
-    })
+    fetch(event.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+        }
+        return networkResponse;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
