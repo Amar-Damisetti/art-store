@@ -578,6 +578,11 @@
           </label>
           <input type="text" id="newCustomOptions" placeholder="Comma-separated choices: Roasted Almonds, Cashews, Walnuts, Choco-chips" />
           <small style="color: #666; font-size: 0.78rem;">If checked, customer can pick their desired mix on the product page!</small>
+          <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #fbcfe8;">
+            <label style="margin: 0 0 4px 0; color: #22223b;">📦 Pack Sizes / Variants with Prices (Optional)</label>
+            <input type="text" id="newPackSizes" placeholder="e.g. 1 Piece (25g): 25, Pack of 4: 95, Pack of 8: 185, Pack of 12: 270" />
+            <small style="color: #666; font-size: 0.76rem;">Format: <strong>Label: Price</strong> separated by commas. Leave blank for single-price items.</small>
+          </div>
         </div>
 
         <div class="admin-media-box">
@@ -1229,6 +1234,9 @@ if (data && data.result === 'success') {
       document.getElementById('newHighlights').value = item.highlights ? item.highlights.join(', ') : '';
       document.getElementById('newCustomizable').checked = !!item.customizable;
       document.getElementById('newCustomOptions').value = item.customOptions ? item.customOptions.join(', ') : '';
+      document.getElementById('newPackSizes').value = Array.isArray(item.packSizes)
+        ? item.packSizes.map(ps => `${ps.label}: ${ps.price}`).join(', ')
+        : '';
 
       submitProductBtn.textContent = "Save Changes";
       cancelEditBtn.style.display = "inline-block";
@@ -1267,6 +1275,15 @@ if (data && data.result === 'success') {
 
       const highlights = rawHighlights ? rawHighlights.split(',').map(h => h.trim()).filter(Boolean) : ["Handmade with premium ingredients"];
       const customOptions = rawCustomOptions ? rawCustomOptions.split(',').map(o => o.trim()).filter(Boolean) : [];
+      const rawPackSizes = document.getElementById('newPackSizes').value.trim();
+      const packSizes = rawPackSizes
+        ? rawPackSizes.split(',').map(entry => {
+            const parts = entry.split(':');
+            const label = (parts[0] || '').trim();
+            const price = parseInt((parts[1] || '0').replace(/[^0-9]/g, ''), 10) || 0;
+            return label && price > 0 ? { label, price } : null;
+          }).filter(Boolean)
+        : [];
 
       const products = getArtworks();
       const editIndex = parseInt(editIndexInput.value);
@@ -1285,6 +1302,9 @@ if (data && data.result === 'success') {
         highlights: highlights,
         customizable: isCustom,
         customOptions: customOptions,
+        customizable: isCustom,
+        customOptions: customOptions,
+        packSizes: packSizes,
         images: images.length > 0 ? images : ["images/logo1.png"],
         video: video
       };

@@ -442,19 +442,79 @@ const liveSummaryText = document.getElementById('liveSummaryText');
 
 let currentActiveProduct = null;
 let selectedCustomChoices = [];
+let selectedPackOption = null;
+let selectedModalQty = 1;
+
+function getEffectiveUnitPrice(prod) {
+  if (selectedPackOption && selectedPackOption.price > 0) {
+    return selectedPackOption.price;
+  }
+  return parseInt((prod.discountPrice || '0').replace(/[^0-9]/g, ''), 10) || 0;
+}
+
+function refreshQuickViewPriceDisplay() {
+  if (!currentActiveProduct) return;
+  const unitPrice = getEffectiveUnitPrice(currentActiveProduct);
+  const totalModalPrice = unitPrice * selectedModalQty;
+
+  if (detailDiscountPrice) {
+    detailDiscountPrice.textContent = `₹${totalModalPrice.toLocaleString('en-IN')}`;
+  }
+
+  const origNum = parseInt((currentActiveProduct.originalPrice || '0').replace(/[^0-9]/g, ''), 10) || 0;
+  if (detailOriginalPrice) {
+    if (!selectedPackOption && origNum > unitPrice) {
+      detailOriginalPrice.style.display = 'inline';
+      detailOriginalPrice.textContent = `₹${(origNum * selectedModalQty).toLocaleString('en-IN')}`;
+    } else {
+      detailOriginalPrice.style.display = 'none';
+    }
+  }
+}
 
 function openQuickView(prod) {
-  currentActiveProduct = prod; 
+  currentActiveProduct = prod;
   selectedCustomChoices = [];
+  selectedPackOption = null;
+  selectedModalQty = 1;
+
+  const qtyDisplay = document.getElementById('detailQtyDisplay');
+  if (qtyDisplay) qtyDisplay.textContent = '1';
 
   if (detailCategory) detailCategory.textContent = `${prod.mainCategoryName} • ${prod.subCategoryName}`;
   if (detailTitle) detailTitle.textContent = prod.title;
-  if (detailOriginalPrice) detailOriginalPrice.textContent = prod.originalPrice;
-  if (detailDiscountPrice) detailDiscountPrice.textContent = prod.discountPrice;
   if (detailBadge) detailBadge.textContent = prod.discountBadge;
   if (detailDesc) detailDesc.textContent = prod.description;
   if (customPersonalNote) customPersonalNote.value = '';
-  updateCareGuideForProduct(prod); // (or whatever variable name your product has, like 'product' or 'item')
+  updateCareGuideForProduct(prod);
+
+  // Render Pack Sizes / Variants if configured in Admin
+  const packSizeWrapper = document.getElementById('packSizeWrapper');
+  const packSizeOptionsContainer = document.getElementById('packSizeOptionsContainer');
+  if (packSizeWrapper && packSizeOptionsContainer) {
+    if (Array.isArray(prod.packSizes) && prod.packSizes.length > 0) {
+      packSizeWrapper.style.display = 'block';
+      packSizeOptionsContainer.innerHTML = '';
+      selectedPackOption = prod.packSizes[0];
+
+      prod.packSizes.forEach((ps, idx) => {
+        const label = document.createElement('label');
+        label.className = 'custom-chip-label';
+        label.innerHTML = `<input type="radio" name="productPackSize" value="${ps.label}" ${idx === 0 ? 'checked' : ''}> <span>${ps.label} — ₹${ps.price}</span>`;
+        label.querySelector('input').addEventListener('change', () => {
+          selectedPackOption = ps;
+          refreshQuickViewPriceDisplay();
+          updateLiveCustomSummary();
+        });
+        packSizeOptionsContainer.appendChild(label);
+      });
+    } else {
+      packSizeWrapper.style.display = 'none';
+      packSizeOptionsContainer.innerHTML = '';
+    }
+  }
+
+  refreshQuickViewPriceDisplay();
 
   if (detailMainImg) {
     detailMainImg.src = (prod.images && prod.images.length > 0) ? prod.images[0] : 'images/logo1.png';
@@ -513,6 +573,13 @@ function updateLiveCustomSummary() {
   const personalNote = customPersonalNote ? customPersonalNote.value.trim() : '';
   let parts = [];
 
+  if (selectedPackOption) {
+    parts.push(`Pack: ${selectedPackOption.label}`);
+  }
+  if (selectedModalQty > 1) {
+    parts.push(`Qty: ${selectedModalQty}`);
+  }
+
   if (currentActiveProduct && currentActiveProduct.mainCategory === 'bakery') {
     if (selectedCustomChoices.length > 0) parts.push(`Nuts: ${selectedCustomChoices.join(', ')}`);
     else parts.push('Standard Chef Recipe');
@@ -525,17 +592,30 @@ function updateLiveCustomSummary() {
   liveSummaryText.textContent = parts.join(' | ');
 }
 
-if (customPersonalNote) customPersonalNote.addEventListener('input', updateLiveCustomSummary);
-document.querySelectorAll('input[name="artLightGlow"]').forEach(radio => {
-  radio.addEventListener('change', updateLiveCustomSummary);
-});
+// Quantity +/- Button Handlers inside Quick-View Modal
+const detailQtyMinusBtn = document.getElementById('detailQtyMinusBtn');
+const detailQtyPlusBtn = document.getElementById('detailQtyPlusBtn');
+const detailQtyDisplay = document.getElementById('detailQtyDisplay');
 
-if (closeProductModal) {
-  closeProductModal.addEventListener('click', () => {
-    productModal.classList.remove('active');
+if (detailQtyMinusBtn && detailQtyDisplay) {
+  detailQtyMinusBtn.addEventListener('click', () => {
+    if (selectedModalQty > 1) {
+      selectedModalQty -= 1;
+      detailQtyDisplay.textContent = selectedModalQty;
+      refreshQuickViewPriceDisplay();
+      updateLiveCustomSummary();
+    }
   });
 }
 
+if (detailQtyPlusBtn && detailQtyDisplay) {
+  detailQtyPlusBtn.addEventListener('click', () => {
+    selectedModalQty += 1;
+    detailQtyDisplay.textContent = selectedModalQty;
+    refreshQuickViewPriceDisplay();
+    updateLiveCustomSummary();
+  });
+}
 // GPS Current Location
 const btnGetLocation = document.getElementById('btnGetLocation');
 const locationNotice = document.getElementById('locationNotice');
@@ -656,7 +736,7 @@ function isMobileDevice() {
 function recalculateCheckoutTotals() {
   if (!currentActiveProduct) return;
 
-  const itemPriceNum = parseInt((currentActiveProduct.discountPrice || '0').replace(/[^0-9]/g, '')) || 0;
+  const itemPriceNum = getEffectiveUnitPrice(currentActiveProduct) * selectedModalQty;
   const deliveryFeeNum = parseInt(deliveryZoneSelect ? deliveryZoneSelect.value : '70') || 0;
   const selectedOption = deliveryZoneSelect ? deliveryZoneSelect.options[deliveryZoneSelect.selectedIndex] : null;
   const zoneName = selectedOption ? (selectedOption.getAttribute('data-name') || 'Courier') : 'Courier';
@@ -729,7 +809,7 @@ function collectCurrentOrderData(paymentMode) {
   const giftWrapFeeNum = isGiftWrap ? 50 : 0;
   const fullAddress = `${street}, ${city} - ${pincode}`;
 
-  const itemPriceNum = parseInt((currentActiveProduct.discountPrice || '0').replace(/[^0-9]/g, '')) || 0;
+  const itemPriceNum = getEffectiveUnitPrice(currentActiveProduct) * selectedModalQty;
   const deliveryFeeNum = parseInt(deliveryZoneSelect ? deliveryZoneSelect.value : '70') || 0;
   const selectedOption = deliveryZoneSelect ? deliveryZoneSelect.options[deliveryZoneSelect.selectedIndex] : null;
   const zoneName = selectedOption ? (selectedOption.getAttribute('data-name') || 'Courier') : 'Courier';
@@ -738,7 +818,7 @@ function collectCurrentOrderData(paymentMode) {
     orderId: orderId,
     status: 'Pending',
     customDeliveryDate: '',
-    item: currentActiveProduct.title,
+    item: `${selectedModalQty > 1 ? selectedModalQty + 'x ' : ''}${currentActiveProduct.title}${selectedPackOption ? ' (' + selectedPackOption.label + ')' : ''}`,,
     category: categoryInfo,
     customSelection: customOrderText ? `${customBlueprint} | Note: ${customOrderText}` : customBlueprint,
     customOrderText: customOrderText,
@@ -1916,7 +1996,7 @@ function updateFloatingCartBadge() {
 function addCurrentProductToCart() {
   if (!currentActiveProduct) return;
 
-  const unitPrice = parseInt((currentActiveProduct.discountPrice || '0').replace(/[^0-9]/g, '')) || 0;
+  const unitPrice = getEffectiveUnitPrice(currentActiveProduct);
   const blueprint = liveSummaryText ? liveSummaryText.textContent : 'Standard Configuration';
   const note = customPersonalNote ? customPersonalNote.value.trim() : '';
 
@@ -1926,14 +2006,14 @@ function addCurrentProductToCart() {
   );
 
   if (existingIndex > -1) {
-    vyoraCart[existingIndex].qty += 1;
+    vyoraCart[existingIndex].qty += selectedModalQty;
   } else {
     vyoraCart.push({
       id: currentActiveProduct.id,
       title: currentActiveProduct.title,
       category: `${currentActiveProduct.mainCategoryName} (${currentActiveProduct.subCategoryName})`,
       unitPrice: unitPrice,
-      qty: 1,
+      qty: selectedModalQty,
       customization: blueprint,
       note: note,
       image: (currentActiveProduct.images && currentActiveProduct.images[0]) || 'images/logo1.png'

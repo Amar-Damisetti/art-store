@@ -290,7 +290,7 @@
         <option value="price_desc">💎 Price: High to Low</option>
       </select>
     </div>
-    
+
     <!-- Product Grid -->
     <div class="gallery-grid" id="productGrid"></div>
     <div id="paginationControls" style="display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 26px;"></div>
@@ -458,6 +458,21 @@
 </details>
 
           <div id="customizationSection">
+            <!-- Dynamic Pack Size / Variant Selector -->
+            <div id="packSizeWrapper" style="display:none; margin-bottom:12px;">
+              <label style="font-size:0.82rem; font-weight:700; color:#2d3748;">📦 Select Pack Size / Variant:</label>
+              <div class="custom-options-grid" id="packSizeOptionsContainer"></div>
+            </div>
+
+            <!-- Quantity Selector -->
+            <div style="display:flex; align-items:center; justify-content:space-between; background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; padding:8px 12px; margin-bottom:12px;">
+              <span style="font-size:0.82rem; font-weight:700; color:#2d3748;">🔢 Quantity:</span>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <button type="button" id="detailQtyMinusBtn" style="width:28px; height:28px; border-radius:8px; border:1.5px solid #ffd6e0; background:#fff; color:#ff3366; font-weight:800; cursor:pointer;">−</button>
+                <span id="detailQtyDisplay" style="font-size:0.95rem; font-weight:700; color:#22223b; min-width:20px; text-align:center;">1</span>
+                <button type="button" id="detailQtyPlusBtn" style="width:28px; height:28px; border-radius:8px; border:1.5px solid #ffd6e0; background:#fff; color:#059669; font-weight:800; cursor:pointer;">+</button>
+              </div>
+            </div>
             <div id="nutToppingWrapper" style="display:none; margin-bottom:12px;">
               <label style="font-size:0.82rem; font-weight:700; color:#2d3748;">🥜 Select Your Nuts & Toppings:</label>
               <div class="custom-options-grid" id="customOptionsContainer"></div>
