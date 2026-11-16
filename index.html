@@ -277,6 +277,20 @@
       <h2 id="currentCategoryHeading" style="font-family:'Playfair Display',serif; font-size:1.6rem; color:#22223b;">All Handcrafted Creations</h2>
     </div>
 
+    <!-- Live Search & Price Sort Toolbar -->
+    <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; max-width: 760px; margin: 0 auto 20px;">
+      <div style="position: relative; flex: 1; min-width: 220px;">
+        <input type="text" id="storeSearchInput" placeholder="🔍 Search art, cookies, nuts, or 'under 500'..." style="width: 100%; padding: 11px 36px 11px 14px; border: 1.5px solid #ffd6e0; border-radius: 12px; font-size: 0.88rem; outline: none; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.03);" />
+        <button type="button" id="clearStoreSearchBtn" style="display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #9ca3af; font-size: 1.1rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <select id="storeSortSelect" style="padding: 11px 14px; border: 1.5px solid #ffd6e0; border-radius: 12px; font-size: 0.85rem; font-weight: 600; color: #22223b; background: #fff8f9; cursor: pointer; outline: none;">
+        <option value="featured">✨ Sort: Featured Mix</option>
+        <option value="price_asc">💰 Price: Low to High</option>
+        <option value="price_desc">💎 Price: High to Low</option>
+      </select>
+    </div>
+    
     <!-- Product Grid -->
     <div class="gallery-grid" id="productGrid"></div>
     <div id="paginationControls" style="display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 26px;"></div>

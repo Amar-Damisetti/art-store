@@ -244,10 +244,15 @@ function getProducts() {
 }
 
 let activeFilter = 'all';
+let currentSearchQuery = '';
+let currentSortOrder = 'featured';
 let currentPage = 1;
-const ITEMS_PER_PAGE = 8; // Shows 8 products per page (4 rows on mobile, 2 rows on desktop)
+const ITEMS_PER_PAGE = 8;
 
-// Mixes products across categories so "All Creations" shows samples from every category on each page
+function getNumericPrice(priceStr) {
+  return parseInt((priceStr || '0').replace(/[^0-9]/g, '')) || 0;
+}
+
 function getBalancedCategoryMix(productList) {
   const buckets = {};
   productList.forEach(p => {
@@ -283,19 +288,14 @@ function renderPaginationControls(totalItems) {
   }
 
   let html = '';
-
-  // Previous Button
   html += `<button type="button" onclick="goToStorePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} style="padding: 8px 14px; border-radius: 10px; border: 1.5px solid #ffd6e0; background: ${currentPage === 1 ? '#f9fafb' : '#fff'}; color: ${currentPage === 1 ? '#9ca3af' : '#ff3366'}; font-weight: 700; font-size: 0.84rem; cursor: ${currentPage === 1 ? 'not-allowed' : 'pointer'};">← Prev</button>`;
 
-  // Numbered Page Buttons (Page 1, Page 2, Page 3...)
   for (let i = 1; i <= totalPages; i++) {
     const isActive = i === currentPage;
     html += `<button type="button" onclick="goToStorePage(${i})" style="padding: 8px 14px; border-radius: 10px; border: 1.5px solid ${isActive ? '#ff3366' : '#e5e7eb'}; background: ${isActive ? 'linear-gradient(135deg, #ff3366, #ff758c)' : '#fff'}; color: ${isActive ? '#fff' : '#22223b'}; font-weight: 700; font-size: 0.84rem; cursor: pointer; box-shadow: ${isActive ? '0 4px 10px rgba(255,51,102,0.25)' : 'none'};">${i}</button>`;
   }
 
-  // Next Button
   html += `<button type="button" onclick="goToStorePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} style="padding: 8px 14px; border-radius: 10px; border: 1.5px solid #ffd6e0; background: ${currentPage === totalPages ? '#f9fafb' : '#fff'}; color: ${currentPage === totalPages ? '#9ca3af' : '#ff3366'}; font-weight: 700; font-size: 0.84rem; cursor: ${currentPage === totalPages ? 'not-allowed' : 'pointer'};">Next →</button>`;
-
   container.innerHTML = html;
 }
 
@@ -315,6 +315,7 @@ function renderProductGrid() {
   const products = getProducts();
   productGrid.innerHTML = '';
 
+  // 1. Category Filter
   let filtered = products.filter(p => {
     if (activeFilter === 'all') return true;
 
@@ -334,13 +335,40 @@ function renderProductGrid() {
     );
   });
 
-  // When viewing "All Creations", interleave categories so every page shows samples from all categories
-  if (activeFilter === 'all') {
+  // 2. Live Keyword & "Under ₹X" Search Filter
+  if (currentSearchQuery) {
+    const q = currentSearchQuery.toLowerCase().trim();
+    const underMatch = q.match(/(?:under|below|less than|<)\s*₹?\s*(\d+)/);
+
+    if (underMatch) {
+      const maxPrice = parseInt(underMatch[1], 10);
+      filtered = filtered.filter(p => getNumericPrice(p.discountPrice) <= maxPrice);
+    } else {
+      filtered = filtered.filter(p => {
+        const searchableText = [
+          p.title,
+          p.description,
+          p.mainCategoryName,
+          p.subCategoryName,
+          ...(Array.isArray(p.customOptions) ? p.customOptions : []),
+          ...(Array.isArray(p.highlights) ? p.highlights : [])
+        ].join(' ').toLowerCase();
+        return searchableText.includes(q);
+      });
+    }
+  }
+
+  // 3. Price Sorting or Balanced Category Mix
+  if (currentSortOrder === 'price_asc') {
+    filtered.sort((a, b) => getNumericPrice(a.discountPrice) - getNumericPrice(b.discountPrice));
+  } else if (currentSortOrder === 'price_desc') {
+    filtered.sort((a, b) => getNumericPrice(b.discountPrice) - getNumericPrice(a.discountPrice));
+  } else if (activeFilter === 'all' && !currentSearchQuery) {
     filtered = getBalancedCategoryMix(filtered);
   }
 
   if (filtered.length === 0) {
-    productGrid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#888;">No creations found under this category.</div>`;
+    productGrid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#888;">No creations found matching your search or filter.</div>`;
     renderPaginationControls(0);
     return;
   }
@@ -2181,3 +2209,37 @@ document.addEventListener('visibilitychange', () => {
     syncStorefrontFromCloud();
   }
 });
+
+// Live Search & Price Sort Listeners
+const storeSearchInput = document.getElementById('storeSearchInput');
+const clearStoreSearchBtn = document.getElementById('clearStoreSearchBtn');
+const storeSortSelect = document.getElementById('storeSortSelect');
+
+if (storeSearchInput) {
+  storeSearchInput.addEventListener('input', (e) => {
+    currentSearchQuery = e.target.value;
+    currentPage = 1;
+    if (clearStoreSearchBtn) {
+      clearStoreSearchBtn.style.display = currentSearchQuery ? 'block' : 'none';
+    }
+    renderProductGrid();
+  });
+}
+
+if (clearStoreSearchBtn && storeSearchInput) {
+  clearStoreSearchBtn.addEventListener('click', () => {
+    storeSearchInput.value = '';
+    currentSearchQuery = '';
+    currentPage = 1;
+    clearStoreSearchBtn.style.display = 'none';
+    renderProductGrid();
+  });
+}
+
+if (storeSortSelect) {
+  storeSortSelect.addEventListener('change', (e) => {
+    currentSortOrder = e.target.value;
+    currentPage = 1;
+    renderProductGrid();
+  });
+}
