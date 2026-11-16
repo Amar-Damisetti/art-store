@@ -1179,11 +1179,23 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then((reg) => {
       reg.update();
+
+      // Check for new code updates whenever the installed app is resumed from background
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          reg.update();
+        }
+      });
+
+      // Also check silently every 15 minutes while the app stays open
+      setInterval(() => {
+        reg.update();
+      }, 15 * 60 * 1000);
     }).catch(err => {
       console.log('ServiceWorker registration skipped:', err);
     });
 
-    // Automatically reload open storefront when a newly deployed version activates
+    // Automatically reload the installed app when a newly deployed version activates
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (!refreshing) {
