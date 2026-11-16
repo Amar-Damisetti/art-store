@@ -244,6 +244,69 @@ function getProducts() {
 }
 
 let activeFilter = 'all';
+let currentPage = 1;
+const ITEMS_PER_PAGE = 8; // Shows 8 products per page (4 rows on mobile, 2 rows on desktop)
+
+// Mixes products across categories so "All Creations" shows samples from every category on each page
+function getBalancedCategoryMix(productList) {
+  const buckets = {};
+  productList.forEach(p => {
+    const key = (p.subCategory || p.mainCategory || 'other').toLowerCase();
+    if (!buckets[key]) buckets[key] = [];
+    buckets[key].push(p);
+  });
+
+  const keys = Object.keys(buckets);
+  const mixed = [];
+  let added = true;
+
+  while (added) {
+    added = false;
+    keys.forEach(key => {
+      if (buckets[key].length > 0) {
+        mixed.push(buckets[key].shift());
+        added = true;
+      }
+    });
+  }
+  return mixed;
+}
+
+function renderPaginationControls(totalItems) {
+  const container = document.getElementById('paginationControls');
+  if (!container) return;
+
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  if (totalPages <= 1) {
+    container.innerHTML = '';
+    return;
+  }
+
+  let html = '';
+
+  // Previous Button
+  html += `<button type="button" onclick="goToStorePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} style="padding: 8px 14px; border-radius: 10px; border: 1.5px solid #ffd6e0; background: ${currentPage === 1 ? '#f9fafb' : '#fff'}; color: ${currentPage === 1 ? '#9ca3af' : '#ff3366'}; font-weight: 700; font-size: 0.84rem; cursor: ${currentPage === 1 ? 'not-allowed' : 'pointer'};">← Prev</button>`;
+
+  // Numbered Page Buttons (Page 1, Page 2, Page 3...)
+  for (let i = 1; i <= totalPages; i++) {
+    const isActive = i === currentPage;
+    html += `<button type="button" onclick="goToStorePage(${i})" style="padding: 8px 14px; border-radius: 10px; border: 1.5px solid ${isActive ? '#ff3366' : '#e5e7eb'}; background: ${isActive ? 'linear-gradient(135deg, #ff3366, #ff758c)' : '#fff'}; color: ${isActive ? '#fff' : '#22223b'}; font-weight: 700; font-size: 0.84rem; cursor: pointer; box-shadow: ${isActive ? '0 4px 10px rgba(255,51,102,0.25)' : 'none'};">${i}</button>`;
+  }
+
+  // Next Button
+  html += `<button type="button" onclick="goToStorePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} style="padding: 8px 14px; border-radius: 10px; border: 1.5px solid #ffd6e0; background: ${currentPage === totalPages ? '#f9fafb' : '#fff'}; color: ${currentPage === totalPages ? '#9ca3af' : '#ff3366'}; font-weight: 700; font-size: 0.84rem; cursor: ${currentPage === totalPages ? 'not-allowed' : 'pointer'};">Next →</button>`;
+
+  container.innerHTML = html;
+}
+
+function goToStorePage(pageNum) {
+  currentPage = pageNum;
+  renderProductGrid();
+  const storeSection = document.getElementById('store');
+  if (storeSection) {
+    storeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
 
 function renderProductGrid() {
   const productGrid = document.getElementById('productGrid');
@@ -252,7 +315,7 @@ function renderProductGrid() {
   const products = getProducts();
   productGrid.innerHTML = '';
 
-  const filtered = products.filter(p => {
+  let filtered = products.filter(p => {
     if (activeFilter === 'all') return true;
 
     const filterKey = activeFilter.toLowerCase();
@@ -261,7 +324,6 @@ function renderProductGrid() {
     const mainCat = (p.mainCategory || '').toLowerCase();
     const title = (p.title || '').toLowerCase();
 
-    // Match exact category OR any sub-category/title containing the keyword (e.g. "cookie", "choco", "bottle", "resin")
     const baseWord = filterKey.replace(/_art$/, '').replace(/s$/, '');
     return (
       subCat === filterKey ||
@@ -272,17 +334,29 @@ function renderProductGrid() {
     );
   });
 
+  // When viewing "All Creations", interleave categories so every page shows samples from all categories
+  if (activeFilter === 'all') {
+    filtered = getBalancedCategoryMix(filtered);
+  }
+
   if (filtered.length === 0) {
     productGrid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#888;">No creations found under this category.</div>`;
+    renderPaginationControls(0);
     return;
   }
 
-  filtered.forEach(prod => {
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  if (currentPage > totalPages) currentPage = 1;
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const pageItems = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  pageItems.forEach(prod => {
     const card = document.createElement('div');
     card.className = 'art-card';
     const mainImg = (prod.images && prod.images.length > 0) ? prod.images[0] : 'images/logo1.png';
 
-   card.innerHTML = `
+    card.innerHTML = `
       <div class="img-wrapper">
         <span class="card-badge">${prod.customizable ? '✨ Custom Choice' : 'Handmade'}</span>
         <img src="${mainImg}" alt="${prod.title}" onerror="this.src='images/logo1.png'">
@@ -294,7 +368,6 @@ function renderProductGrid() {
         </div>
         <h3>${prod.title}</h3>
         
-        <!-- 👇 STAR RATING & HANDCRAFTED BADGE 👇 -->
         <div style="display: flex; align-items: center; justify-content: space-between; margin: 6px 0 8px 0; font-size: 0.75rem;">
           <span style="display: inline-flex; align-items: center; gap: 4px; color: #d97706; font-weight: 700; background: #fffbeb; padding: 2px 7px; border-radius: 6px; border: 1px solid #fef3c7;">
             ★ 4.9 <span style="color: #6b7280; font-weight: 500;">(42)</span>
@@ -303,7 +376,6 @@ function renderProductGrid() {
             ✓ Handcrafted to Order
           </span>
         </div>
-        <!-- 👆 END OF RATING BADGE 👆 -->
 
         <div class="price-box">
           <span class="discount-price">${prod.discountPrice}</span>
@@ -318,6 +390,8 @@ function renderProductGrid() {
     card.querySelector('.img-wrapper').addEventListener('click', () => openQuickView(prod));
     productGrid.appendChild(card);
   });
+
+  renderPaginationControls(filtered.length);
 }
 
 // Quick View Modal
@@ -1159,6 +1233,7 @@ categoryBubbles.forEach(bubble => {
     bubble.classList.add('active');
 
     activeFilter = bubble.getAttribute('data-category-filter');
+    currentPage = 1;   
     const label = bubble.querySelector('.bubble-label') ? bubble.querySelector('.bubble-label').textContent : 'Collection';
 
     if (currentCategoryHeading) {
