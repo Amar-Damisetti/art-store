@@ -769,193 +769,104 @@
   </style>
 
   <script src="script.js"></script>
-<!-- Floating Secret Code Pill -->
+<!-- Floating Promo Coupon Pill -->
 <div id="surpriseOfferPill" 
-     onclick="openSecretPopup()" 
-     style="position: fixed; bottom: 80px; left: 20px; z-index: 999999; background: #ffffff; border: 1.5px solid #ff3366; border-radius: 30px; padding: 8px 16px; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 24px rgba(255, 51, 102, 0.2); cursor: pointer; pointer-events: auto;">
+     onclick="openVyoraVoucherModal()" 
+     style="position: fixed; bottom: 80px; left: 20px; z-index: 999999; background: #ffffff; border: 1.5px solid #ff3366; border-radius: 30px; padding: 8px 16px; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 24px rgba(255, 51, 102, 0.2); cursor: pointer;">
   <span style="font-size: 1.2rem;">🎁</span>
-  <span style="font-size: 0.82rem; font-weight: 700; color: #22223b;">coupon Code</span>
+  <span style="font-size: 0.82rem; font-weight: 700; color: #22223b;">Coupon Code</span>
 </div>
 
-<!-- Built-In Secret Code Popup Modal -->
-<div id="vyoraSecretModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px);">
-  <div style="background: #ffffff; border-radius: 20px; max-width: 360px; width: 100%; padding: 24px; text-align: center; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.25);">
-    <button onclick="closeSecretPopup()" style="position: absolute; top: 12px; right: 14px; background: none; border: none; font-size: 20px; color: #666; cursor: pointer;">✕</button>
-    <div style="font-size: 2.5rem; margin-bottom: 8px;">🎁</div>
-    <h3 style="margin: 0 0 6px 0; color: #1a1a1a; font-size: 1.2rem;">Today's Secret Code!</h3>
-    <p style="color: #666; font-size: 0.85rem; margin: 0 0 16px 0;">Apply this code at checkout for a special surprise discount.</p>
+<!-- Single Dynamic Promo Voucher Popup Modal -->
+<div id="voucherModalOverlay" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.65); backdrop-filter: blur(4px); z-index: 1000000; justify-content: center; align-items: center; padding: 20px;">
+  <div style="background: #ffffff; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; padding: 28px 22px; box-shadow: 0 20px 45px rgba(0,0,0,0.25); position: relative;">
+    <button id="closeVoucherModalBtn" type="button" onclick="document.getElementById('voucherModalOverlay').style.display='none'" style="position: absolute; top: 12px; right: 14px; background: none; border: none; font-size: 1.6rem; color: #9ca3af; cursor: pointer; line-height: 1;">&times;</button>
     
-    <div style="background: #fff0f3; border: 1.5px dashed #ff3366; border-radius: 12px; padding: 12px; font-weight: 800; font-size: 1.3rem; letter-spacing: 2px; color: #ff3366; margin-bottom: 16px;" id="popupCodeText">
-      VYORA10
+    <div style="font-size: 2.6rem; margin-bottom: 6px;">🎁</div>
+    <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #22223b; margin-bottom: 6px;">Today's Exclusive Offer!</h3>
+    
+    <!-- Shows exact Admin Panel discount value & tagline -->
+    <div id="voucherModalOfferBadge" style="display: inline-block; background: #dcfce7; color: #15803d; font-weight: 800; font-size: 0.92rem; padding: 5px 14px; border-radius: 20px; margin-bottom: 8px;">
+      10% OFF
     </div>
-    
-    <button onclick="copySecretCode()" id="copyCodeBtn" style="width: 100%; background: #ff3366; color: #fff; border: none; border-radius: 30px; padding: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer;">
-      Copy Code & Shop
+    <p id="voucherModalTagline" style="font-size: 0.86rem; color: #4b5563; margin-bottom: 16px; line-height: 1.4;">
+      10% OFF on your entire order
+    </p>
+
+    <!-- Promo Code Ticket Display -->
+    <div style="background: #fff0f3; border: 2px dashed #ff3366; border-radius: 12px; padding: 14px; margin-bottom: 18px;">
+      <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; color: #ff3366; display: block; margin-bottom: 4px;">USE CODE AT CHECKOUT</span>
+      <div id="voucherModalCodeDisplay" style="font-size: 1.6rem; font-weight: 800; letter-spacing: 3px; color: #ff3366;">VYORA10</div>
+    </div>
+
+    <!-- Copy Only (Does NOT auto-apply discount unless customer clicks Apply in checkout) -->
+    <button id="copyVoucherOnlyBtn" type="button" onclick="copyVyoraVoucherCode()" style="width: 100%; background: linear-gradient(135deg, #ff3366, #ff758c); color: #ffffff; border: none; padding: 12px 18px; border-radius: 30px; font-weight: 700; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 14px rgba(255, 51, 102, 0.3);">
+      📋 Copy Code & Shop
     </button>
+    <div id="voucherCopiedToast" style="display: none; color: #059669; font-size: 0.82rem; font-weight: 700; margin-top: 10px;">
+      ✅ Code copied! Paste & click "Apply" in the order form to get your discount.
+    </div>
   </div>
+</div>
+
+<!-- Floating Payment Failure / Status Toast -->
+<div id="paymentStatusToast" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #fee2e2; border: 1.5px solid #f87171; color: #b91c1c; padding: 12px 20px; border-radius: 30px; font-size: 0.86rem; font-weight: 700; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 100000; align-items: center; gap: 8px; text-align: center; max-width: 90vw;">
+  <span style="font-size: 1.1rem;">⚠️</span>
+  <span id="paymentStatusToastMsg">Payment Failed or Cancelled. Please retry or choose Cash on Delivery.</span>
 </div>
 
 <script>
-function openSecretPopup() {
-  // Check if admin saved a custom code in localStorage, otherwise use VYORA10
-  const savedCode = localStorage.getItem('secretPromoCode') || localStorage.getItem('todaySecretCode') || 'VYORA10';
-  const codeEl = document.getElementById('popupCodeText');
-  if (codeEl) codeEl.innerText = savedCode;
-  
-  const modal = document.getElementById('vyoraSecretModal');
+function openVyoraVoucherModal() {
+  const promo = typeof getStorePromoSettings === 'function'
+    ? getStorePromoSettings()
+    : { enabled: true, code: "VYORA10", type: "percent", value: 10, label: "10% OFF on your entire order" };
+
+  if (!promo.enabled) return;
+
+  const badgeEl = document.getElementById('voucherModalOfferBadge');
+  const taglineEl = document.getElementById('voucherModalTagline');
+  const codeEl = document.getElementById('voucherModalCodeDisplay');
+  const toastEl = document.getElementById('voucherCopiedToast');
+  const copyBtn = document.getElementById('copyVoucherOnlyBtn');
+
+  const offerSummary = promo.type === 'flat'
+    ? `FLAT ₹${promo.value} OFF`
+    : `${promo.value}% OFF`;
+
+  if (badgeEl) badgeEl.textContent = offerSummary;
+  if (taglineEl) taglineEl.textContent = promo.label || `${offerSummary} on your order`;
+  if (codeEl) codeEl.textContent = promo.code;
+  if (toastEl) toastEl.style.display = 'none';
+  if (copyBtn) {
+    copyBtn.textContent = '📋 Copy Code & Shop';
+    copyBtn.style.background = 'linear-gradient(135deg, #ff3366, #ff758c)';
+  }
+
+  const modal = document.getElementById('voucherModalOverlay');
   if (modal) modal.style.display = 'flex';
 }
 
-function closeSecretPopup() {
-  const modal = document.getElementById('vyoraSecretModal');
-  if (modal) modal.style.display = 'none';
-}
+function copyVyoraVoucherCode() {
+  const codeEl = document.getElementById('voucherModalCodeDisplay');
+  const toastEl = document.getElementById('voucherCopiedToast');
+  const copyBtn = document.getElementById('copyVoucherOnlyBtn');
+  const code = codeEl ? codeEl.textContent.trim() : '';
 
-function copySecretCode() {
-  const code = document.getElementById('popupCodeText').innerText.trim();
-  navigator.clipboard.writeText(code).then(() => {
-    const btn = document.getElementById('copyCodeBtn');
-    btn.innerText = 'Copied to Clipboard! ✓';
-    btn.style.background = '#2b9348';
-    setTimeout(() => {
-      closeSecretPopup();
-      btn.innerText = 'Copy Code & Shop';
-      btn.style.background = '#ff3366';
-    }, 1200);
-  });
-}
-</script>
- <!-- ========================================== -->
-  <!-- 🎁 SECRET VOUCHER POPUP MODAL (VYORA)      -->
-  <!-- ========================================== -->
-  <div id="voucherModalOverlay" style="display: none; position: fixed; inset: 0; background: rgba(17, 24, 39, 0.65); backdrop-filter: blur(4px); z-index: 99999; justify-content: center; align-items: center; padding: 20px;">
-    <div style="background: #ffffff; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; padding: 28px 22px; box-shadow: 0 20px 45px rgba(0,0,0,0.25); position: relative;">
-      
-      <!-- Close Button -->
-      <button id="closeVoucherModalBtn" type="button" style="position: absolute; top: 12px; right: 14px; background: none; border: none; font-size: 1.6rem; color: #9ca3af; cursor: pointer; line-height: 1;">&times;</button>
-      
-      <div style="font-size: 2.8rem; margin-bottom: 6px;">🎉</div>
-      <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #22223b; margin-bottom: 6px;">Today's Exclusive Gift!</h3>
-      <p id="voucherModalTagline" style="font-size: 0.88rem; color: #6b7280; margin-bottom: 18px; line-height: 1.4;">
-        Apply this promo code at checkout to unlock savings on your order.
-      </p>
-
-      <!-- Promo Code Ticket Display -->
-      <div style="background: #fff0f3; border: 2px dashed #ff3366; border-radius: 12px; padding: 14px; margin-bottom: 18px;">
-        <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; color: #ff3366; display: block; margin-bottom: 4px;">PROMO CODE</span>
-        <div id="voucherModalCodeDisplay" style="font-size: 1.6rem; font-weight: 800; letter-spacing: 3px; color: #ff3366;">VYORA10</div>
-      </div>
-
-      <!-- Action Button -->
-      <button id="applyVoucherAutoBtn" type="button" style="width: 100%; background: linear-gradient(135deg, #ff3366, #ff758c); color: #ffffff; border: none; padding: 12px 18px; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 14px rgba(255, 51, 102, 0.3);">
-        📋 Copy & Apply Discount
-      </button>
-      <div id="voucherCopiedToast" style="display: none; color: #059669; font-size: 0.82rem; font-weight: 700; margin-top: 10px;">
-        ✅ Code applied! You're ready to checkout.
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // Bulletproof direct modal opener
-    function openVyoraVoucherModal() {
-      let promo = { enabled: true, code: "VYORA10", label: "10% OFF on your entire order" };
-      try {
-        const stored = localStorage.getItem('vyora_promo_settings');
-        if (stored) {
-          promo = JSON.parse(stored);
-        }
-      } catch (err) {}
-
-      // If intentionally turned OFF in admin, do not open
-      if (promo.enabled === false) {
-        alert("No discount promo is currently active.");
-        return;
-      }
-
-      const modal = document.getElementById('voucherModalOverlay');
-      const codeDisplay = document.getElementById('voucherModalCodeDisplay');
-      const tagline = document.getElementById('voucherModalTagline');
-      const toast = document.getElementById('voucherCopiedToast');
-
-      if (codeDisplay) codeDisplay.textContent = promo.code || "VYORA10";
-      if (tagline) tagline.textContent = promo.label || "Special discount at checkout!";
-      if (toast) toast.style.display = "none";
-
-      if (modal) {
-        modal.style.display = "flex";
-      }
-    }
-
-    // Modal Close
-    document.addEventListener("DOMContentLoaded", function() {
-      const closeBtn = document.getElementById('closeVoucherModalBtn');
-      const modal = document.getElementById('voucherModalOverlay');
-      const autoBtn = document.getElementById('applyVoucherAutoBtn');
-      const toast = document.getElementById('voucherCopiedToast');
-
-      if (closeBtn && modal) {
-        closeBtn.onclick = function() { modal.style.display = 'none'; };
-        modal.onclick = function(e) {
-          if (e.target === modal) modal.style.display = 'none';
-        };
-      }
-
-      if (autoBtn) {
-        autoBtn.onclick = function() {
-          let code = "VYORA10";
-          try {
-            const stored = localStorage.getItem('vyora_promo_settings');
-            if (stored) code = JSON.parse(stored).code || "VYORA10";
-          } catch(e) {}
-
-          // Copy to clipboard
-          if (navigator.clipboard) {
-            navigator.clipboard.writeText(code).catch(function(){});
-          }
-
-          // Fill into checkout coupon input if present
-          const input = document.getElementById('couponInput');
-          if (input) {
-            input.value = code;
-          }
-
-          // Trigger promo calculation if function exists
-          if (typeof applyStorePromo === 'function') {
-            applyStorePromo(code);
-          }
-
-          if (toast) toast.style.display = 'block';
-
-          setTimeout(function() {
-            if (modal) modal.style.display = 'none';
-          }, 1000);
-        };
-      }
-    });
-  </script>
-  <!-- Floating Payment Failure / Status Toast -->
-  <div id="paymentStatusToast" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #fee2e2; border: 1.5px solid #f87171; color: #b91c1c; padding: 12px 20px; border-radius: 30px; font-size: 0.86rem; font-weight: 700; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 100000; align-items: center; gap: 8px; text-align: center; max-width: 90vw;">
-    <span style="font-size: 1.1rem;">⚠️</span>
-    <span id="paymentStatusToastMsg">Payment Failed or Cancelled. Please retry or choose Cash on Delivery.</span>
-  </div>
-  <script>
-// Auto-hide Secret Code Pill when Checkout / Order Modal is visible
-setInterval(() => {
-  const secretPill = document.getElementById('surpriseOfferPill');
-  if (!secretPill) return;
-
-  // Search for any active checkout/order containers
-  const checkoutOpen = document.querySelector(
-    '.checkout-modal.active, #checkoutModal[style*="display: block"], #checkoutModal[style*="display: flex"], #orderFormModal[style*="display: flex"], .modal-overlay.active'
-  );
-
-  if (checkoutOpen) {
-    secretPill.style.display = 'none';
-  } else {
-    secretPill.style.display = 'flex';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(code).catch(() => {});
   }
-}, 300);
+
+  if (copyBtn) {
+    copyBtn.textContent = 'Copied to Clipboard! ✓';
+    copyBtn.style.background = '#059669';
+  }
+  if (toastEl) toastEl.style.display = 'block';
+
+  setTimeout(() => {
+    const modal = document.getElementById('voucherModalOverlay');
+    if (modal) modal.style.display = 'none';
+  }, 1100);
+}
 </script>
 </body>
 </html>

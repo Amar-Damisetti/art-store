@@ -1117,7 +1117,7 @@ if (openCheckoutModalBtn) {
       mainSubmitOrderBtn.textContent = 'Confirm & Place Order (Cash on Delivery) 🛍️';
       mainSubmitOrderBtn.style.background = 'linear-gradient(135deg, #ff3366, #ff758c)';
     }
-
+    resetCheckoutPromoState();
     recalculateCheckoutTotals();
     if (orderModal) orderModal.classList.add('active');
   });
@@ -1674,172 +1674,79 @@ function syncStorePromoVisibility() {
   }
 }
 
+function resetCheckoutPromoState() {
+  activeAppliedPromo = null;
+  const input = document.getElementById('couponInput');
+  const feedback = document.getElementById('couponFeedback');
+  const discountRow = document.getElementById('discountRow');
+  if (input) input.value = '';
+  if (feedback) feedback.style.display = 'none';
+  if (discountRow) discountRow.style.display = 'none';
+}
+
 function applyStorePromo(inputCode) {
   const settings = getStorePromoSettings();
   const feedback = document.getElementById('couponFeedback');
   const discountRow = document.getElementById('discountRow');
 
   if (!settings.enabled) {
+    activeAppliedPromo = null;
     if (feedback) {
       feedback.textContent = "No promotional campaigns are currently active.";
       feedback.style.color = "#dc2626";
       feedback.style.display = "block";
     }
+    if (discountRow) discountRow.style.display = "none";
+    recalculateCheckoutTotals();
     return;
   }
 
   const cleanInput = (inputCode || "").trim().toUpperCase();
 
   if (!cleanInput) {
+    activeAppliedPromo = null;
     if (feedback) {
       feedback.textContent = "Please enter a coupon code.";
       feedback.style.color = "#dc2626";
       feedback.style.display = "block";
     }
+    if (discountRow) discountRow.style.display = "none";
+    recalculateCheckoutTotals();
     return;
   }
 
   if (cleanInput !== settings.code.toUpperCase()) {
+    activeAppliedPromo = null;
     if (feedback) {
       feedback.textContent = "Invalid or expired promo code.";
       feedback.style.color = "#dc2626";
       feedback.style.display = "block";
     }
-    activeAppliedPromo = null;
     if (discountRow) discountRow.style.display = "none";
+    recalculateCheckoutTotals();
     return;
   }
 
   activeAppliedPromo = settings;
+  const offerText = settings.type === 'flat' ? `₹${settings.value} OFF` : `${settings.value}% OFF`;
   if (feedback) {
-    feedback.textContent = `Applied: ${settings.label}!`;
+    feedback.textContent = `✅ Coupon Applied! (${offerText} — ${settings.label})`;
     feedback.style.color = "#059669";
     feedback.style.display = "block";
   }
 
-  calculateCheckoutDiscount();
+  recalculateCheckoutTotals();
 }
 
-function calculateCheckoutDiscount() {
-  const discountRow = document.getElementById('discountRow');
-  const discountDisplay = document.getElementById('discountValueDisplay');
-  const grandTotalEl = document.getElementById('checkoutFinalTotal') || document.getElementById('cartGrandTotal');
-
-  if (!grandTotalEl) return;
-
-  let baseAmount = parseInt(grandTotalEl.getAttribute('data-base-price') || grandTotalEl.textContent.replace(/[^0-9]/g, '')) || 0;
-  if (!grandTotalEl.hasAttribute('data-base-price')) {
-    grandTotalEl.setAttribute('data-base-price', baseAmount);
-  } else {
-    baseAmount = parseInt(grandTotalEl.getAttribute('data-base-price'));
-  }
-
-  let discountAmount = 0;
-  if (activeAppliedPromo) {
-    if (activeAppliedPromo.type === 'percent') {
-      discountAmount = Math.round((baseAmount * activeAppliedPromo.value) / 100);
-    } else if (activeAppliedPromo.type === 'flat') {
-      discountAmount = activeAppliedPromo.value;
-    }
-  }
-
-  const finalPayable = Math.max(0, baseAmount - discountAmount);
-
-  if (discountRow && discountDisplay) {
-    if (discountAmount > 0) {
-      discountDisplay.textContent = `-₹${discountAmount}`;
-      discountRow.style.display = "flex";
-    } else {
-      discountRow.style.display = "none";
-    }
-  }
-
-  grandTotalEl.textContent = `₹${finalPayable}`;
-}
-
-// ==========================================================================
-// 🎟️ INTERACTIVE VOUCHER POPUP & AUTO-APPLY CONTROLLER
-// ==========================================================================
-
-const surpriseOfferPill = document.getElementById('surpriseOfferPill');
-const voucherModalOverlay = document.getElementById('voucherModalOverlay');
-const closeVoucherModalBtn = document.getElementById('closeVoucherModalBtn');
-const voucherModalCodeDisplay = document.getElementById('voucherModalCodeDisplay');
-const voucherModalTagline = document.getElementById('voucherModalTagline');
-const applyVoucherAutoBtn = document.getElementById('applyVoucherAutoBtn');
-const voucherCopiedToast = document.getElementById('voucherCopiedToast');
 const couponInput = document.getElementById('couponInput');
 const applyCouponBtn = document.getElementById('applyCouponBtn');
 
-// 1. Open Voucher Modal on Tap
-if (surpriseOfferPill) {
-  surpriseOfferPill.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const settings = getStorePromoSettings();
-
-    // If disabled in admin panel, do nothing
-    if (!settings.enabled) return;
-
-    if (voucherModalCodeDisplay) voucherModalCodeDisplay.textContent = settings.code;
-    if (voucherModalTagline) voucherModalTagline.textContent = settings.label || `Get ${settings.value}% off your handcrafted creations!`;
-    if (voucherCopiedToast) voucherCopiedToast.style.display = 'none';
-
-    if (voucherModalOverlay) {
-      voucherModalOverlay.style.display = 'flex';
-    }
-  });
-}
-
-// 2. Close Modal Handlers
-if (closeVoucherModalBtn && voucherModalOverlay) {
-  closeVoucherModalBtn.addEventListener('click', () => {
-    voucherModalOverlay.style.display = 'none';
-  });
-
-  voucherModalOverlay.addEventListener('click', (e) => {
-    if (e.target === voucherModalOverlay) {
-      voucherModalOverlay.style.display = 'none';
-    }
-  });
-}
-
-// 3. Auto-Copy and Auto-Apply into Checkout
-if (applyVoucherAutoBtn) {
-  applyVoucherAutoBtn.addEventListener('click', () => {
-    const settings = getStorePromoSettings();
-    
-    // Copy code to phone clipboard
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(settings.code).catch(() => {});
-    }
-
-    // Auto-fill into checkout promo input
-    if (couponInput) {
-      couponInput.value = settings.code;
-    }
-
-    // Automatically trigger calculation if customer is already in checkout
-    applyStorePromo(settings.code);
-
-    if (voucherCopiedToast) {
-      voucherCopiedToast.style.display = 'block';
-    }
-
-    // Close modal automatically after 1 second
-    setTimeout(() => {
-      if (voucherModalOverlay) voucherModalOverlay.style.display = 'none';
-    }, 1100);
-  });
-}
-
-// 4. Regular Promo Input Box Listener (Inside Checkout)
 if (applyCouponBtn && couponInput) {
   applyCouponBtn.addEventListener('click', () => {
     applyStorePromo(couponInput.value);
   });
 }
 
-// Check promo visibility whenever storefront loads
 syncStorePromoVisibility();
 // --- CUSTOMIZATION & PHOTO UPLOAD HELPERS ---
 let customerAttachedPhotoBase64 = "";
@@ -2139,7 +2046,7 @@ if (proceedCartCheckoutBtn) {
       mainSubmitOrderBtn.disabled = false;
       mainSubmitOrderBtn.textContent = 'Confirm & Place Order (Cash on Delivery) 🛍️';
     }
-
+    resetCheckoutPromoState();
     recalculateCheckoutTotals();
     if (orderModal) orderModal.classList.add('active');
   });
@@ -2284,10 +2191,10 @@ async function syncStorefrontFromCloud() {
       if (Array.isArray(data.reviews) && data.reviews.length > 0) {
         localStorage.setItem('vyora_customer_reviews', JSON.stringify(data.reviews));
         renderReviews();
+      }  
         if (data.promo && typeof data.promo === 'object') {
         localStorage.setItem('vyora_promo_settings', JSON.stringify(data.promo));
         syncStorePromoVisibility();
-      }
       }
     }
   } catch (err) {
