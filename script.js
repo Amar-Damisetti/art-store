@@ -1516,30 +1516,6 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Admin shortcut (Triple click brand text stack)
-const brandLogoBlock = document.querySelector('.brand-logo');
-let logoClickCount = 0;
-let logoClickTimer = null;
-
-if (brandLogoBlock) {
-  brandLogoBlock.addEventListener('click', (e) => {
-    if (e.target.id === 'brandLogoThumb') return;
-    e.preventDefault();
-    logoClickCount++;
-    clearTimeout(logoClickTimer);
-    logoClickTimer = setTimeout(() => { logoClickCount = 0; }, 1500);
-    if (logoClickCount >= 3) {
-      window.location.href = 'admin.html';
-    }
-  });
-}
-
-document.addEventListener('keydown', (e) => {
-  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
-    window.location.href = 'admin.html';
-  }
-});
-
 // Run Initial Bootstrap
 renderProductGrid();
 // ==========================================================================

@@ -930,6 +930,11 @@
   </div>
 
   <script>
+    const OWNER_ACCESS_KEY = "myvyora";
+    const urlKey = new URLSearchParams(window.location.search).get("access");
+    if (urlKey !== OWNER_ACCESS_KEY && sessionStorage.getItem("vyora_admin_logged") !== "true") {
+      window.location.replace("index.html");
+    }
     const ADMIN_SECRET_PIN = "1234";
 
     // 👉 PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE (For syncing offline orders to Google Sheet):
@@ -1757,6 +1762,7 @@ function renderOrderRow(order) {
           <td style="max-width: 190px;">${order.address || '-'}${mapBtn}</td>
           <td>
             <div class="actions-cell">
+              <button type="button" onclick="openInvoiceReceiptModal(${originalIndex})" style="background:#fff0f3; color:#ff3366; border:1px solid #ffccd5; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:700; font-size:0.82rem;">🧾 Receipt</button>
               <button class="btn-ping-whatsapp" onclick="pingCustomerWhatsApp(${originalIndex})">💬 Ping Customer</button>
               <button class="btn-edit" onclick="openEditOrder(${originalIndex})">Edit Order</button>
               <button class="btn-delete" onclick="deleteOrder(${originalIndex})">Delete</button>
@@ -2026,6 +2032,228 @@ function renderOrderRow(order) {
         alert(`✅ Promo Code "${codeVal}" saved successfully!`);
       });
     }
+    // ==========================================================================
+    // 🧾 ONE-CLICK PRINTABLE / SHAREABLE VYORA INVOICE IMAGE GENERATOR
+    // ==========================================================================
+    let currentInvoiceDataUrl = '';
+    let currentInvoiceFileName = 'VYORA-Receipt.png';
+
+    function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
+      const words = String(text || '').split(' ');
+      let line = '';
+      let currentY = y;
+
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && n > 0) {
+          ctx.fillText(line.trim(), x, currentY);
+          line = words[n] + ' ';
+          currentY += lineHeight;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line.trim(), x, currentY);
+      return currentY + lineHeight;
+    }
+
+    window.openInvoiceReceiptModal = function(orderIndex) {
+      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      const o = orders[orderIndex];
+      if (!o) return;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 760;
+      canvas.height = 1040;
+      const ctx = canvas.getContext('2d');
+
+      // Card Background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Top Brand Header Banner
+      const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
+      grad.addColorStop(0, '#ff3366');
+      grad.addColorStop(1, '#ff758c');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, 165);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 44px Georgia, serif';
+      ctx.fillText('VYORA', 44, 72);
+
+      ctx.font = 'bold 16px Arial, sans-serif';
+      ctx.fillText('SHOP • CREATE • CELEBRATE', 46, 102);
+
+      ctx.font = '15px Arial, sans-serif';
+      ctx.fillStyle = '#ffe4e6';
+      ctx.fillText('100% Homecrafted Art & Gourmet Treats • Kakinada, AP', 46, 134);
+
+      // Right Side Invoice Label
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'right';
+      ctx.font = 'bold 24px Arial, sans-serif';
+      ctx.fillText('ORDER RECEIPT', canvas.width - 44, 68);
+      ctx.font = 'bold 18px Arial, sans-serif';
+      ctx.fillText(o.orderId || 'VY-ORDER', canvas.width - 44, 100);
+      ctx.font = '15px Arial, sans-serif';
+      ctx.fillText(`Date: ${o.orderDate || new Date().toLocaleDateString('en-IN')}`, canvas.width - 44, 130);
+      ctx.textAlign = 'left';
+
+      // Payment & Status Pill Row
+      const isPaid = (o.payment || '').toLowerCase().includes('upi') || (o.payment || '').toLowerCase().includes('paid');
+      ctx.fillStyle = isPaid ? '#dcfce7' : '#fef3c7';
+      ctx.fillRect(44, 192, 310, 44);
+      ctx.fillStyle = isPaid ? '#15803d' : '#b45309';
+      ctx.font = 'bold 16px Arial, sans-serif';
+      ctx.fillText(isPaid ? '✓ PAYMENT VERIFIED (PAID)' : `PAYMENT: ${o.payment || 'COD'}`, 60, 220);
+
+      ctx.fillStyle = '#fff0f3';
+      ctx.fillRect(374, 192, 342, 44);
+      ctx.fillStyle = '#ff3366';
+      ctx.fillText(`STATUS: ${(o.status || 'Confirmed').toUpperCase()}`, 392, 220);
+
+      // Customer & Shipping Section
+      let y = 282;
+      ctx.fillStyle = '#6b7280';
+      ctx.font = 'bold 14px Arial, sans-serif';
+      ctx.fillText('BILLED & SHIPPED TO:', 44, y);
+
+      y += 28;
+      ctx.fillStyle = '#111827';
+      ctx.font = 'bold 22px Arial, sans-serif';
+      ctx.fillText(`${o.customerName || 'Customer'}  (${o.phone || ''})`, 44, y);
+
+      y += 28;
+      ctx.fillStyle = '#374151';
+      ctx.font = '17px Arial, sans-serif';
+      y = wrapCanvasText(ctx, o.address || 'Local Pickup - Kakinada', 44, y, 670, 24);
+
+      // Divider
+      y += 12;
+      ctx.strokeStyle = '#e5e7eb';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(44, y);
+      ctx.lineTo(canvas.width - 44, y);
+      ctx.stroke();
+
+      // Item Details Box
+      y += 34;
+      ctx.fillStyle = '#6b7280';
+      ctx.font = 'bold 14px Arial, sans-serif';
+      ctx.fillText('HANDCRAFTED ITEM & CUSTOMIZATION:', 44, y);
+
+      y += 30;
+      ctx.fillStyle = '#111827';
+      ctx.font = 'bold 21px Arial, sans-serif';
+      y = wrapCanvasText(ctx, o.item || 'Custom VYORA Creation', 44, y, 670, 28);
+
+      y += 6;
+      ctx.fillStyle = '#ff3366';
+      ctx.font = 'bold 17px Arial, sans-serif';
+      y = wrapCanvasText(ctx, `Preferences: ${o.customSelection || 'Standard'}`, 44, y, 670, 24);
+
+      if (o.customDeliveryDate) {
+        y += 6;
+        ctx.fillStyle = '#059669';
+        ctx.font = 'bold 16px Arial, sans-serif';
+        ctx.fillText(`Est. Delivery: ${o.customDeliveryDate}`, 44, y);
+        y += 26;
+      }
+
+      // Billing Totals Box
+      y = Math.max(y + 24, 670);
+      ctx.fillStyle = '#fff8f9';
+      ctx.fillRect(44, y, canvas.width - 88, 175);
+      ctx.strokeStyle = '#ffccd5';
+      ctx.strokeRect(44, y, canvas.width - 88, 175);
+
+      ctx.fillStyle = '#374151';
+      ctx.font = '18px Arial, sans-serif';
+      ctx.fillText('Item Subtotal:', 68, y + 42);
+      ctx.textAlign = 'right';
+      ctx.fillText(o.itemPrice || o.price || '₹0', canvas.width - 68, y + 42);
+
+      ctx.textAlign = 'left';
+      ctx.fillText(`Delivery Fee (${o.deliveryZone || 'Shipping'}):`, 68, y + 80);
+      ctx.textAlign = 'right';
+      ctx.fillText(o.deliveryFee || '₹0', canvas.width - 68, y + 80);
+
+      // Grand Total Line
+      ctx.strokeStyle = '#ffccd5';
+      ctx.beginPath();
+      ctx.moveTo(68, y + 104);
+      ctx.lineTo(canvas.width - 68, y + 104);
+      ctx.stroke();
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#111827';
+      ctx.font = 'bold 24px Arial, sans-serif';
+      ctx.fillText('GRAND TOTAL:', 68, y + 146);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#059669';
+      ctx.fillText(o.price || '₹0', canvas.width - 68, y + 146);
+      ctx.textAlign = 'left';
+
+      // Footer
+      ctx.fillStyle = '#6b7280';
+      ctx.font = '15px Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Thank you for supporting homecrafted art & fresh baking! ❤️', canvas.width / 2, 945);
+      ctx.font = 'bold 15px Arial, sans-serif';
+      ctx.fillStyle = '#ff3366';
+      ctx.fillText('Instagram: @vyora_scc  |  WhatsApp: +91 94913 96383', canvas.width / 2, 976);
+      ctx.textAlign = 'left';
+
+      currentInvoiceDataUrl = canvas.toDataURL('image/png');
+      currentInvoiceFileName = `VYORA-Receipt-${o.orderId || 'Order'}.png`;
+
+      const previewImg = document.getElementById('generatedInvoicePreviewImg');
+      const modal = document.getElementById('invoiceReceiptModal');
+      if (previewImg) previewImg.src = currentInvoiceDataUrl;
+      if (modal) modal.style.display = 'flex';
+    };
+
+    document.getElementById('downloadInvoicePngBtn').addEventListener('click', () => {
+      if (!currentInvoiceDataUrl) return;
+      const a = document.createElement('a');
+      a.href = currentInvoiceDataUrl;
+      a.download = currentInvoiceFileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+
+    document.getElementById('shareInvoiceMobileBtn').addEventListener('click', async () => {
+      if (!currentInvoiceDataUrl) return;
+      try {
+        const res = await fetch(currentInvoiceDataUrl);
+        const blob = await res.blob();
+        const file = new File([blob], currentInvoiceFileName, { type: 'image/png' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: 'VYORA Order Receipt',
+            text: 'Here is your VYORA order receipt! ❤️',
+            files: [file]
+          });
+          return;
+        }
+      } catch (err) {}
+
+      // Fallback on desktop browsers: download PNG so you can drop it into WhatsApp Web
+      document.getElementById('downloadInvoicePngBtn').click();
+      alert('📥 Invoice PNG saved! You can now attach it directly in your WhatsApp chat.');
+    });
+
+    document.getElementById('printInvoiceSlipBtn').addEventListener('click', () => {
+      if (!currentInvoiceDataUrl) return;
+      const printWin = window.open('', '_blank');
+      printWin.document.write(`<html><body style="margin:0;display:flex;justify-content:center;"><img src="${currentInvoiceDataUrl}" style="max-width:100%;height:auto;" onload="window.print();window.close();"/></body></html>`);
+      printWin.document.close();
+    });
   </script>
 </body>
 </html>
