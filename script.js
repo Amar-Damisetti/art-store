@@ -2284,6 +2284,10 @@ async function syncStorefrontFromCloud() {
       if (Array.isArray(data.reviews) && data.reviews.length > 0) {
         localStorage.setItem('vyora_customer_reviews', JSON.stringify(data.reviews));
         renderReviews();
+        if (data.promo && typeof data.promo === 'object') {
+        localStorage.setItem('vyora_promo_settings', JSON.stringify(data.promo));
+        syncStorePromoVisibility();
+      }
       }
     }
   } catch (err) {
