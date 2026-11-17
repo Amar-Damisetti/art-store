@@ -672,7 +672,10 @@ if (btnGetLocation) {
             else if (custStreet && !custStreet.value) custStreet.value = `Near GPS Pin Location`;
 
             if (custCity && city) custCity.value = city;
-            if (custPincode && postcode) custPincode.value = postcode;
+            if (custPincode && postcode) {
+              custPincode.value = postcode;
+             autoDetectDeliveryZoneByPincode(postcode);
+            }
 
             if (locationNotice) {
               locationNotice.style.background = '#dcfce7';
@@ -773,6 +776,45 @@ function recalculateCheckoutTotals() {
 
 if (deliveryZoneSelect) {
   deliveryZoneSelect.addEventListener('change', recalculateCheckoutTotals);
+}
+// ==========================================================================
+// 📍 KAKINADA (533002) PINCODE-BASED DELIVERY ZONE AUTO-DETECTION
+// ==========================================================================
+const KAKINADA_LOCAL_PINCODES = [
+  "533001", "533002", "533003", "533004", "533005", "533006", "533016", "533033"
+];
+
+function autoDetectDeliveryZoneByPincode(rawPin) {
+  if (!deliveryZoneSelect) return;
+
+  // Do not override if customer intentionally chose Self Pickup (₹0)
+  if (deliveryZoneSelect.value === "0") return;
+
+  const pin = (rawPin || "").replace(/[^0-9]/g, "");
+  if (pin.length !== 6) return;
+
+  let detectedZoneValue = "130"; // Default: Pan-India Express (+₹130)
+
+  if (KAKINADA_LOCAL_PINCODES.includes(pin)) {
+    detectedZoneValue = "40"; // Local Kakinada City (+₹40)
+  } else if (
+    pin.startsWith("51") ||
+    pin.startsWith("52") ||
+    pin.startsWith("53")
+  ) {
+    detectedZoneValue = "70"; // Within Andhra Pradesh Courier (+₹70)
+  }
+
+  if (deliveryZoneSelect.value !== detectedZoneValue) {
+    deliveryZoneSelect.value = detectedZoneValue;
+    recalculateCheckoutTotals();
+  }
+}
+
+if (custPincode) {
+  custPincode.addEventListener("input", (e) => {
+    autoDetectDeliveryZoneByPincode(e.target.value);
+  });
 }
 
 // Toggle Payment view: Lock submit button on UPI; enable only on COD
