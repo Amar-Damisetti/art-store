@@ -1549,7 +1549,7 @@ if (data && data.result === 'success') {
 
       if (status === 'Crafting') {
         msg += `🟠 *Status: Crafting / Baking in Progress*\n`;
-        msg += `Your bespoke creation is currently being handcrafted in our studio according to your custom preferences!\n`;
+        msg += `Your bespoke creation is currently being handcrafted in our home kitchen & craft desk according to your custom preferences!\n`;
         msg += `📅 *Expected Dispatch:* ${deliverySchedule}\n\n`;
       } else if (status === 'Shipped') {
         msg += `🔵 *Status: Dispatched & Shipped!*\n`;
@@ -1567,7 +1567,7 @@ if (data && data.result === 'success') {
       msg += `💰 *Grand Total:* ${o.price}\n`;
       msg += `💳 *Payment Mode:* ${o.payment}\n\n`;
       msg += `📍 *Track live progress on your phone here:*\n${trackingLink}\n\n`;
-      msg += `Thank you for supporting handcrafted artistry! ❤️ — VYORA Studio`;
+      msg += `Thank you for supporting handcrafted artistry! ❤️ — VYORA`;
 
       const encoded = encodeURIComponent(msg);
       window.open(`https://wa.me/${phoneClean}?text=${encoded}`, '_blank');

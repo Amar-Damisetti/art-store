@@ -174,7 +174,7 @@ const defaultStarterProducts = [
     originalPrice: "₹699",
     discountPrice: "₹520",
     discountBadge: "25% OFF",
-    description: "You choose the nuts and toppings, and our home studio bakes them fresh just for you! Select from roasted almonds, cashews, walnuts, pistachios, or dark choco-chips.",
+    description: "You choose the nuts and toppings, and our home bakes them fresh just for you! Select from roasted almonds, cashews, walnuts, pistachios, or dark choco-chips.",
     highlights: [
       "Freshly baked on-demand within 4 hours of order",
       "Pick your favorite nut mix below before ordering",
@@ -1176,7 +1176,7 @@ if (sendWhatsAppReceiptBtn) {
     if (!lastPlacedOrderData) return;
     const o = lastPlacedOrderData;
 
-    let msg = `*🛍️ ORDER RECEIPT - VYORA STUDIO*\n`;
+    let msg = `*🛍️ ORDER RECEIPT - VYORA*\n`;
     msg += `------------------------------------\n`;
     msg += `🆔 *Order ID:* ${o.orderId}\n`;
     msg += `📌 *Item:* ${o.item}\n`;
@@ -1867,7 +1867,7 @@ function generateWhatsAppOrderUrl(order) {
   const totalAmount = order.totalPrice || order.itemPrice || '';
 
   const messageText = 
-`🛍️ *NEW ORDER - VYORA STUDIO*
+`🛍️ *NEW ORDER - VYORA*
 ━━━━━━━━━━━━━━━━━━
 🆔 *Order ID:* ${order.orderId || 'VYORA'}
 📅 *Date:* ${order.orderDate || new Date().toLocaleDateString('en-IN')}
