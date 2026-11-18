@@ -571,6 +571,12 @@
           </div>
         </div>
 
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px 14px; border-radius: 10px; margin-top: 14px;">
+          <label style="margin: 0; display: flex; align-items: center; gap: 8px; cursor: pointer; color: #15803d;">
+            <input type="checkbox" id="newInStock" checked style="width: auto; accent-color: #059669;">
+            <span><strong>In Stock / Available for Order</strong> (Uncheck to mark as "Sold Out / Restocking Soon")</span>
+          </label>
+        </div>
         <div style="background: #fdf2f4; padding: 14px; border-radius: 10px; margin-top: 14px;">
           <label style="margin: 0 0 6px 0; display: flex; align-items: center; gap: 8px;">
             <input type="checkbox" id="newCustomizable" style="width: auto;">
@@ -1214,7 +1220,12 @@ if (data && data.result === 'success') {
           <td><span style="font-size:0.8rem; background:#f3f4f6; padding:3px 8px; border-radius:12px;">${prod.subCategoryName || prod.subCategory || '-'}</span></td>
           <td style="color:#888; text-decoration:line-through;">${prod.originalPrice || '-'}</td>
           <td style="color:#059669; font-weight:700;">${prod.discountPrice || '-'}</td>
-          <td>${prod.customizable ? '✅ Yes' : '❌ No'}</td>
+          <td>
+            ${prod.customizable ? '✅ Yes' : '❌ No'}<br>
+            <span style="font-size:0.74rem; font-weight:700; color:${prod.inStock === false ? '#dc2626' : '#059669'};">
+              ${prod.inStock === false ? '🚫 Sold Out' : '🟢 In Stock'}
+            </span>
+          </td>
           <td>
             <div class="actions-cell">
               <button class="btn-link" onclick="copyWhatsAppOrderLink('${prod.id}', '${encodeURIComponent(prod.title)}')">🔗 Copy Link</button>
@@ -1269,6 +1280,7 @@ if (data && data.result === 'success') {
       document.getElementById('newVideo').value = item.video || '';
       document.getElementById('newDesc').value = item.description || '';
       document.getElementById('newHighlights').value = item.highlights ? item.highlights.join(', ') : '';
+      document.getElementById('newInStock').checked = item.inStock !== false;
       document.getElementById('newCustomizable').checked = !!item.customizable;
       document.getElementById('newCustomOptions').value = item.customOptions ? item.customOptions.join(', ') : '';
       document.getElementById('newPackSizes').value = Array.isArray(item.packSizes)
@@ -1303,6 +1315,7 @@ if (data && data.result === 'success') {
       const discountPrice = document.getElementById('newDiscountPrice').value.trim();
       const desc = document.getElementById('newDesc').value.trim();
       const rawHighlights = document.getElementById('newHighlights').value.trim();
+      const isInStock = document.getElementById('newInStock').checked;
       const isCustom = document.getElementById('newCustomizable').checked;
       const rawCustomOptions = document.getElementById('newCustomOptions').value.trim();
 
@@ -1337,6 +1350,7 @@ if (data && data.result === 'success') {
         discountBadge: badge,
         description: desc,
         highlights: highlights,
+        inStock: isInStock,
         customizable: isCustom,
         customOptions: customOptions,
         customizable: isCustom,

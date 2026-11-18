@@ -384,9 +384,13 @@ function renderProductGrid() {
     card.className = 'art-card';
     const mainImg = (prod.images && prod.images.length > 0) ? prod.images[0] : 'images/logo1.png';
 
+    const isSoldOut = prod.inStock === false;
+
     card.innerHTML = `
-      <div class="img-wrapper">
-        <span class="card-badge">${prod.customizable ? '✨ Custom Choice' : 'Handmade'}</span>
+      <div class="img-wrapper" style="${isSoldOut ? 'opacity: 0.78;' : ''}">
+        <span class="card-badge" style="${isSoldOut ? 'background:#dc2626; color:#fff;' : ''}">
+          ${isSoldOut ? '🚫 Sold Out / Restocking Soon' : (prod.customizable ? '✨ Custom Choice' : 'Handmade')}
+        </span>
         <img src="${mainImg}" alt="${prod.title}" onerror="this.src='images/logo1.png'">
       </div>
       <div class="art-info">
@@ -400,8 +404,8 @@ function renderProductGrid() {
           <span style="display: inline-flex; align-items: center; gap: 4px; color: #d97706; font-weight: 700; background: #fffbeb; padding: 2px 7px; border-radius: 6px; border: 1px solid #fef3c7;">
             ★ 4.9 <span style="color: #6b7280; font-weight: 500;">(42)</span>
           </span>
-          <span style="color: #059669; font-weight: 600; font-size: 0.72rem; display: inline-flex; align-items: center; gap: 3px;">
-            ✓ Handcrafted to Order
+          <span style="color: ${isSoldOut ? '#dc2626' : '#059669'}; font-weight: 600; font-size: 0.72rem; display: inline-flex; align-items: center; gap: 3px;">
+            ${isSoldOut ? '⏳ Restocking Soon' : '✓ Handcrafted to Order'}
           </span>
         </div>
 
@@ -410,7 +414,9 @@ function renderProductGrid() {
           <span class="original-price">${prod.originalPrice}</span>
           <span class="discount-badge">${prod.discountBadge}</span>
         </div>
-        <button type="button" class="view-details-btn">View Details & Customise</button>
+        <button type="button" class="view-details-btn" style="${isSoldOut ? 'background:#f3f4f6; color:#6b7280; border-color:#d1d5db;' : ''}">
+          ${isSoldOut ? 'View Details (Sold Out)' : 'View Details & Customise'}
+        </button>
       </div>
     `;
 
@@ -504,6 +510,14 @@ function openQuickView(prod) {
         label.querySelector('input').addEventListener('change', () => {
           selectedPackOption = ps;
           refreshQuickViewPriceDisplay();
+          const isSoldOut = prod.inStock === false;
+  const soldOutBanner = document.getElementById('modalSoldOutBanner');
+  const addCartBtn = document.getElementById('addToCartModalBtn');
+  const buyNowBtn = document.getElementById('openCheckoutModalBtn');
+
+  if (soldOutBanner) soldOutBanner.style.display = isSoldOut ? 'block' : 'none';
+  if (addCartBtn) addCartBtn.style.display = isSoldOut ? 'none' : 'block';
+  if (buyNowBtn) buyNowBtn.style.display = isSoldOut ? 'none' : 'block';
           updateLiveCustomSummary();
         });
         packSizeOptionsContainer.appendChild(label);
@@ -889,6 +903,46 @@ function collectCurrentOrderData(paymentMode) {
     orderDate: new Date().toLocaleDateString('en-IN')
   };
 }
+function saveCustomerAddressProfile() {
+  const profile = {
+    name: (document.getElementById('custName')?.value || '').trim(),
+    phone: (document.getElementById('custPhone')?.value || '').trim(),
+    street: (document.getElementById('custStreet')?.value || '').trim(),
+    city: (document.getElementById('custCity')?.value || '').trim(),
+    pincode: (document.getElementById('custPincode')?.value || '').trim(),
+    mapLink: (custGpsMapLink?.value || '').trim()
+  };
+  if (profile.name && profile.phone) {
+    localStorage.setItem('vyora_saved_customer_profile', JSON.stringify(profile));
+  }
+}
+
+function prefillSavedCustomerAddress() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('vyora_saved_customer_profile') || 'null');
+    if (!saved) return;
+
+    const nameEl = document.getElementById('custName');
+    const phoneEl = document.getElementById('custPhone');
+    const streetEl = document.getElementById('custStreet');
+    const cityEl = document.getElementById('custCity');
+    const pinEl = document.getElementById('custPincode');
+
+    if (nameEl && !nameEl.value && saved.name) nameEl.value = saved.name;
+    if (phoneEl && !phoneEl.value && saved.phone) phoneEl.value = saved.phone;
+    if (streetEl && !streetEl.value && saved.street) streetEl.value = saved.street;
+    if (cityEl && !cityEl.value && saved.city) cityEl.value = saved.city;
+    if (pinEl && !pinEl.value && saved.pincode) {
+      pinEl.value = saved.pincode;
+      if (typeof autoDetectDeliveryZoneByPincode === 'function') {
+        autoDetectDeliveryZoneByPincode(saved.pincode);
+      }
+    }
+    if (custGpsMapLink && !custGpsMapLink.value && saved.mapLink) {
+      custGpsMapLink.value = saved.mapLink;
+    }
+  } catch (err) {}
+}
 function validateShippingForm() {
   const name = document.getElementById('custName').value.trim();
   const phone = document.getElementById('custPhone').value.trim();
@@ -979,6 +1033,7 @@ function finalizeAndShowReceipt(orderData) {
   if (orderSuccessView) orderSuccessView.style.display = 'block';
 
   const orderFormEl = document.getElementById('orderForm');
+  saveCustomerAddressProfile();
   if (orderFormEl) orderFormEl.reset();
   if (custGpsMapLink) custGpsMapLink.value = '';
   if (locationNotice) locationNotice.style.display = 'none';
@@ -1159,6 +1214,7 @@ if (openCheckoutModalBtn) {
       mainSubmitOrderBtn.textContent = 'Confirm & Place Order (Cash on Delivery) 🛍️';
       mainSubmitOrderBtn.style.background = 'linear-gradient(135deg, #ff3366, #ff758c)';
     }
+    prefillSavedCustomerAddress();
     resetCheckoutPromoState();
     recalculateCheckoutTotals();
     if (orderModal) orderModal.classList.add('active');
@@ -1338,7 +1394,81 @@ async function executeOrderTrack(query) {
     </div>
   `;
 
+const reorderBtnWrap = document.createElement('div');
+  reorderBtnWrap.style.cssText = 'margin-top: 12px; text-align: center;';
+  reorderBtnWrap.innerHTML = `
+    <button type="button" id="trackerReorderBtn" style="width: 100%; background: linear-gradient(135deg, #ff3366, #ff758c); color: #fff; border: none; padding: 11px 16px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; cursor: pointer; box-shadow: 0 4px 12px rgba(255,51,102,0.25);">
+      🔁 Reorder This Item with Same Preferences
+    </button>
+  `;
+  trackResultContainer.appendChild(reorderBtnWrap);
+
+  const reorderBtn = document.getElementById('trackerReorderBtn');
+  if (reorderBtn) {
+    reorderBtn.addEventListener('click', () => {
+      reorderFromPastOrder(matched);
+    });
+  }
   trackResultContainer.style.display = 'block';
+}
+function reorderFromPastOrder(pastOrder) {
+  const products = getProducts();
+  const rawItemName = (pastOrder.item || '').replace(/^\d+x\s*/i, '').split(' (')[0].trim().toLowerCase();
+  const matchedProd = products.find(p => (p.title || '').toLowerCase().includes(rawItemName) || rawItemName.includes((p.title || '').toLowerCase()));
+
+  if (!matchedProd) {
+    alert("This custom item is no longer listed in the catalog. You can message us on WhatsApp to repeat this exact order!");
+    return;
+  }
+
+  if (matchedProd.inStock === false) {
+    alert(`"${matchedProd.title}" is currently Sold Out / Restocking Soon.`);
+    return;
+  }
+
+  if (customerTrackModal) customerTrackModal.classList.remove('active');
+  openQuickView(matchedProd);
+
+  const prevPref = pastOrder.customSelection || '';
+
+  // Pre-select matching Pack Size if present
+  if (Array.isArray(matchedProd.packSizes) && matchedProd.packSizes.length > 0) {
+    const packMatch = prevPref.match(/Pack:\s*([^|]+)/i);
+    if (packMatch) {
+      const targetPack = packMatch[1].trim().toLowerCase();
+      document.querySelectorAll('input[name="productPackSize"]').forEach(radio => {
+        if (radio.value.toLowerCase() === targetPack) {
+          radio.checked = true;
+          radio.dispatchEvent(new Event('change'));
+        }
+      });
+    }
+  }
+
+  // Pre-select matching Nuts / Toppings checkboxes
+  if (matchedProd.mainCategory === 'bakery' && customOptionsContainer) {
+    customOptionsContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      if (prevPref.toLowerCase().includes(cb.value.toLowerCase())) {
+        cb.checked = true;
+        cb.dispatchEvent(new Event('change'));
+      }
+    });
+  } else {
+    // Pre-select matching LED Fairy Light Glow radio
+    document.querySelectorAll('input[name="artLightGlow"]').forEach(radio => {
+      if (prevPref.toLowerCase().includes(radio.value.toLowerCase())) {
+        radio.checked = true;
+        radio.dispatchEvent(new Event('change'));
+      }
+    });
+  }
+
+  // Pre-fill Personal Note if present
+  const noteMatch = prevPref.match(/Note:\s*"([^"]+)"/i);
+  if (noteMatch && customPersonalNote) {
+    customPersonalNote.value = noteMatch[1];
+    updateLiveCustomSummary();
+  }
 }
 
 if (searchTrackBtn) searchTrackBtn.addEventListener('click', () => executeOrderTrack());
@@ -2064,6 +2194,7 @@ if (proceedCartCheckoutBtn) {
       mainSubmitOrderBtn.disabled = false;
       mainSubmitOrderBtn.textContent = 'Confirm & Place Order (Cash on Delivery) 🛍️';
     }
+    prefillSavedCustomerAddress();
     resetCheckoutPromoState();
     recalculateCheckoutTotals();
     if (orderModal) orderModal.classList.add('active');
