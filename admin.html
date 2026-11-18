@@ -1095,7 +1095,7 @@
 if (data && data.result === 'success') {
           // 1. Merge Orders
           if (Array.isArray(data.orders)) {
-            const localOrders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
+            const localOrders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
             const mergedMap = new Map();
 
             localOrders.forEach(o => { if (o.orderId) mergedMap.set(o.orderId, o); });
@@ -1110,7 +1110,7 @@ if (data && data.result === 'success') {
               }
             });
 
-            localStorage.setItem('vyora_orders', JSON.stringify(Array.from(mergedMap.values())));
+            localStorage.setItem('ciy_orders', JSON.stringify(Array.from(mergedMap.values())));
             loadAdminDashboard();
           }
 
