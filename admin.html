@@ -1095,7 +1095,7 @@
 if (data && data.result === 'success') {
           // 1. Merge Orders
           if (Array.isArray(data.orders)) {
-            const localOrders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+            const localOrders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
             const mergedMap = new Map();
 
             localOrders.forEach(o => { if (o.orderId) mergedMap.set(o.orderId, o); });
@@ -1110,13 +1110,13 @@ if (data && data.result === 'success') {
               }
             });
 
-            localStorage.setItem('ciy_orders', JSON.stringify(Array.from(mergedMap.values())));
+            localStorage.setItem('vyora_orders', JSON.stringify(Array.from(mergedMap.values())));
             loadAdminDashboard();
           }
 
           // 2. Sync Cloud Products (if sheet has products)
           if (Array.isArray(data.products) && data.products.length > 0) {
-            localStorage.setItem('ciy_products', JSON.stringify(data.products));
+            localStorage.setItem('vyora_products', JSON.stringify(data.products));
             loadArtworksTable();
           }
 
@@ -1191,10 +1191,10 @@ if (data && data.result === 'success') {
     newVideoInput.addEventListener('input', updateMediaPreview);
 
     function getArtworks() {
-      let stored = JSON.parse(localStorage.getItem('ciy_products') || 'null');
+      let stored = JSON.parse(localStorage.getItem('vyora_products') || 'null');
       if (!stored || !Array.isArray(stored) || stored.length === 0) {
         stored = defaultStarterProducts;
-        localStorage.setItem('ciy_products', JSON.stringify(stored));
+        localStorage.setItem('vyora_products', JSON.stringify(stored));
       }
       return stored;
     }
@@ -1365,7 +1365,7 @@ if (data && data.result === 'success') {
         alert(`"${title}" added to your catalog!`);
       }
 
-      localStorage.setItem('ciy_products', JSON.stringify(products));
+      localStorage.setItem('vyora_products', JSON.stringify(products));
       syncProductsToCloud(products);
       resetFormMode();
       loadArtworksTable();
@@ -1375,7 +1375,7 @@ if (data && data.result === 'success') {
       const products = getArtworks();
       if (confirm(`Remove "${products[index].title}"?`)) {
         products.splice(index, 1);
-        localStorage.setItem('ciy_products', JSON.stringify(products));
+        localStorage.setItem('vyora_products', JSON.stringify(products));
         syncProductsToCloud(products);
         loadArtworksTable();
       }
@@ -1506,9 +1506,9 @@ if (data && data.result === 'success') {
         orderDate: new Date().toLocaleDateString('en-IN')
       };
 
-      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      const orders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
       orders.push(orderData);
-      localStorage.setItem('ciy_orders', JSON.stringify(orders));
+      localStorage.setItem('vyora_orders', JSON.stringify(orders));
 
       syncOfflineOrderToCloud(orderData);
 
@@ -1555,7 +1555,7 @@ if (data && data.result === 'success') {
     }
 
     function loadAdminDashboard() {
-      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      const orders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
       const totalOrdersEl = document.getElementById('totalOrders');
       const totalRevenueEl = document.getElementById('totalRevenue');
 
@@ -1572,7 +1572,7 @@ if (data && data.result === 'success') {
     }
 
     window.pingCustomerWhatsApp = function(orderIndex) {
-      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      const orders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
       const o = orders[orderIndex];
       if (!o) return;
 
@@ -1659,11 +1659,11 @@ function renderOrderRow(order) {
 }
 
  window.updateOrderStatusDirect = function(orderIndex, newStatus) {
-      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      const orders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
       if (!orders[orderIndex]) return;
 
       orders[orderIndex].status = newStatus;
-      localStorage.setItem('ciy_orders', JSON.stringify(orders));
+      localStorage.setItem('vyora_orders', JSON.stringify(orders));
       fetch(GOOGLE_SHEET_WEBHOOK_URL, {
         method: "POST",
         mode: "no-cors",
@@ -1680,7 +1680,7 @@ function renderOrderRow(order) {
     };
 
     window.sendDispatchWhatsApp = function(orderIndex) {
-      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      const orders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
       const o = orders[orderIndex];
       if (!o) return;
 
@@ -1697,7 +1697,7 @@ function renderOrderRow(order) {
     };
 
     function renderOrdersTableRows() {
-      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      const orders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
       const tbody = document.getElementById('ordersTbody');
       const query = (orderSearchInput ? orderSearchInput.value : '').trim().toLowerCase();
 
@@ -1789,7 +1789,7 @@ function renderOrderRow(order) {
     }
 
     window.openEditOrder = function(index) {
-      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      const orders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
       const order = orders[index];
       if (!order) return;
 
@@ -1814,7 +1814,7 @@ function renderOrderRow(order) {
     editOrderForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const index = parseInt(editOrderIndex.value);
-      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      const orders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
       if (index >= 0 && index < orders.length) {
         const itemVal = parseInt(editItemPrice.value.replace(/[^0-9]/g, '')) || 0;
         const deliveryVal = parseInt(editDeliveryFee.value.replace(/[^0-9]/g, '')) || 0;
@@ -1832,7 +1832,7 @@ function renderOrderRow(order) {
         orders[index].address = editCustAddress.value.trim();
         orders[index].googleMapsLink = editGoogleMapsLink.value.trim();
 
-        localStorage.setItem('ciy_orders', JSON.stringify(orders));
+        localStorage.setItem('vyora_orders', JSON.stringify(orders));
         alert(`Order "${orders[index].orderId}" updated successfully! New Total: ₹${totalVal}`);
         editOrderModal.style.display = 'none';
         loadAdminDashboard();
@@ -1841,15 +1841,15 @@ function renderOrderRow(order) {
 
     window.deleteOrder = function(index) {
       if (confirm("Remove this order record?")) {
-        const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+        const orders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
         orders.splice(index, 1);
-        localStorage.setItem('ciy_orders', JSON.stringify(orders));
+        localStorage.setItem('vyora_orders', JSON.stringify(orders));
         loadAdminDashboard();
       }
     };
 
     document.getElementById('exportBtn').addEventListener('click', () => {
-      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      const orders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
       if (orders.length === 0) return alert("No orders to export!");
 
       let csv = "data:text/csv;charset=utf-8,Order ID,Date,Status,Delivery Date,Item,Custom Choices,Item Cost,Delivery Fee,Zone,Grand Total,Customer,Phone,Address,Google Maps Pin\n";
@@ -2070,7 +2070,7 @@ function renderOrderRow(order) {
     }
 
     window.openInvoiceReceiptModal = function(orderIndex) {
-      const orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+      const orders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
       const o = orders[orderIndex];
       if (!o) return;
 

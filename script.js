@@ -3,11 +3,11 @@
 // ==========================================================================
 
 // 👉 YOUR 10-DIGIT WHATSAPP NUMBER:
-const CIY_WHATSAPP_NUMBER = "919491396383"; 
+const VYORA_WHATSAPP_NUMBER = "919491396383"; 
 
 // 👉 YOUR UPI DETAILS:
 const CIY_UPI_ID = "7842161638@ibl";
-const CIY_UPI_NAME = "VYORA";
+const vyora_UPI_NAME = "VYORA";
 
 // 👉 YOUR GOOGLE APPS SCRIPT WEB APP URL (Using Executable Endpoint):
 const GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzHfZ1iBj5eNPNeZi_hBTSLijoKjAnsFTbd0m54dS5fFxYAhYDdD9M2w4ezQJjI5vFVUg/exec";
@@ -232,12 +232,12 @@ const defaultStarterProducts = [
 const CATALOG_SYNC_KEY = "vyora_catalog_v25_app_ready";
 
 function getProducts() {
-  const currentKey = localStorage.getItem("ciy_sync_stamp");
-  let stored = JSON.parse(localStorage.getItem('ciy_products') || 'null');
+  const currentKey = localStorage.getItem("vyora_sync_stamp");
+  let stored = JSON.parse(localStorage.getItem('vyora_products') || 'null');
 
   if (!stored || currentKey !== CATALOG_SYNC_KEY) {
-    localStorage.setItem('ciy_products', JSON.stringify(defaultStarterProducts));
-    localStorage.setItem('ciy_sync_stamp', CATALOG_SYNC_KEY);
+    localStorage.setItem('vyora_products', JSON.stringify(defaultStarterProducts));
+    localStorage.setItem('vyora_sync_stamp', CATALOG_SYNC_KEY);
     return defaultStarterProducts;
   }
   return stored;
@@ -781,7 +781,7 @@ function recalculateCheckoutTotals() {
   if (modalArtPrice) modalArtPrice.textContent = `₹${currentCalculatedTotal.toLocaleString('en-IN')}`;
 
   const tempOrderRef = "VY-" + Math.floor(100000 + Math.random() * 900000);
-  const upiDeepLink = `upi://pay?pa=${encodeURIComponent(CIY_UPI_ID)}&pn=${encodeURIComponent(CIY_UPI_NAME)}&am=${currentCalculatedTotal}&cu=INR&tn=${encodeURIComponent(tempOrderRef)}`;
+  const upiDeepLink = `upi://pay?pa=${encodeURIComponent(CIY_UPI_ID)}&pn=${encodeURIComponent(vyora_UPI_NAME)}&am=${currentCalculatedTotal}&cu=INR&tn=${encodeURIComponent(tempOrderRef)}`;
 
   if (formUpiQrImg) {
     formUpiQrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=8&data=${encodeURIComponent(upiDeepLink)}`;
@@ -975,9 +975,9 @@ function finalizeAndShowReceipt(orderData) {
   clearTimeout(desktopFallbackTimer);
   lastPlacedOrderData = orderData;
 
-  const existingOrders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+  const existingOrders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
   existingOrders.push(orderData);
-  localStorage.setItem('ciy_orders', JSON.stringify(existingOrders));
+  localStorage.setItem('vyora_orders', JSON.stringify(existingOrders));
 
   syncOrderToGoogleSheet(orderData);
 
@@ -1062,7 +1062,7 @@ function triggerDirectUpiPayment(appName) {
 
   const cleanAmount = currentCalculatedTotal;
   const note = encodeURIComponent(`Order ${pendingOrderDraft.orderId}`);
-  const payee = encodeURIComponent(CIY_UPI_NAME);
+  const payee = encodeURIComponent(vyora_UPI_NAME);
   const upiDeepLink = `upi://pay?pa=${encodeURIComponent(CIY_UPI_ID)}&pn=${payee}&am=${cleanAmount}&cu=INR&tn=${note}`;
 
   isAwaitingUpiReturn = true;
@@ -1117,7 +1117,7 @@ function triggerDirectUpiPayment(appName) {
 
   const cleanAmount = currentCalculatedTotal;
   const note = encodeURIComponent(`Order ${pendingOrderDraft.orderId}`);
-  const payee = encodeURIComponent(CIY_UPI_NAME);
+  const payee = encodeURIComponent(vyora_UPI_NAME);
   const upiDeepLink = `upi://pay?pa=${encodeURIComponent(CIY_UPI_ID)}&pn=${payee}&am=${cleanAmount}&cu=INR&tn=${note}`;
 
   isAwaitingUpiReturn = true;
@@ -1248,7 +1248,7 @@ if (sendWhatsAppReceiptBtn) {
     msg += `Hi! I placed this order through your website checkout. Please let me know the dispatch schedule!`;
 
     const encoded = encodeURIComponent(msg);
-    window.open(`https://wa.me/${CIY_WHATSAPP_NUMBER}?text=${encoded}`, '_blank');
+    window.open(`https://wa.me/${VYORA_WHATSAPP_NUMBER}?text=${encoded}`, '_blank');
   });
 }
 
@@ -1276,7 +1276,7 @@ if (whatsappChatOnlyBtn) {
     if (note) msg += `✍️ *Note:* "${note}"\n`;
 
     const encoded = encodeURIComponent(msg);
-    window.open(`https://wa.me/${CIY_WHATSAPP_NUMBER}?text=${encoded}`, '_blank');
+    window.open(`https://wa.me/${VYORA_WHATSAPP_NUMBER}?text=${encoded}`, '_blank');
   });
 }
 
@@ -1322,7 +1322,7 @@ async function executeOrderTrack(query) {
     searchTrackBtn.disabled = true;
   }
 
-  let orders = JSON.parse(localStorage.getItem('ciy_orders') || '[]');
+  let orders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
 
   // Fetch live orders from Google Sheet so cross-device & offline admin orders are found
   if (GOOGLE_SHEET_WEBHOOK_URL) {
@@ -1343,7 +1343,7 @@ async function executeOrderTrack(query) {
           }
         });
         orders = Array.from(mergedMap.values());
-        localStorage.setItem('ciy_orders', JSON.stringify(orders));
+        localStorage.setItem('vyora_orders', JSON.stringify(orders));
       }
     } catch (err) {
       console.log('Cloud tracking lookup fallback to local cache');
@@ -1511,7 +1511,7 @@ if (mobileBottomTrackBtn) {
 const floatingBtn = document.getElementById('floatingWhatsAppBtn');
 if (floatingBtn) {
   const defaultMsg = encodeURIComponent("Hi VYORA! I am browsing your website and had a few questions about a custom order.");
-  floatingBtn.href = `https://wa.me/${CIY_WHATSAPP_NUMBER}?text=${defaultMsg}`;
+  floatingBtn.href = `https://wa.me/${VYORA_WHATSAPP_NUMBER}?text=${defaultMsg}`;
 }
 
 const categoryBubbles = document.querySelectorAll('.category-bubble-card');
@@ -1965,7 +1965,6 @@ function toggleGiftWrapPrice(checkbox) {
   }
 }
 // --- LIVE WHATSAPP ORDER ROUTING ---
-const VYORA_WHATSAPP_NUMBER = "919491396383"; // 👈 Replace with your 10-digit WhatsApp number (with 91 prefix)
 
 function generateWhatsAppOrderUrl(order) {
   const customNote = order.customOrderText || order.customMessage || order.note || 'None';
@@ -2225,7 +2224,7 @@ recalculateCheckoutTotals = function() {
   applyActiveDiscountToSummary();
 
   const tempOrderRef = "VY-" + Math.floor(100000 + Math.random() * 900000);
-  const upiDeepLink = `upi://pay?pa=${encodeURIComponent(CIY_UPI_ID)}&pn=${encodeURIComponent(CIY_UPI_NAME)}&am=${currentCalculatedTotal}&cu=INR&tn=${encodeURIComponent(tempOrderRef)}`;
+  const upiDeepLink = `upi://pay?pa=${encodeURIComponent(CIY_UPI_ID)}&pn=${encodeURIComponent(vyora_UPI_NAME)}&am=${currentCalculatedTotal}&cu=INR&tn=${encodeURIComponent(tempOrderRef)}`;
   if (formUpiQrImg) {
     formUpiQrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=8&data=${encodeURIComponent(upiDeepLink)}`;
   }
@@ -2333,8 +2332,8 @@ async function syncStorefrontFromCloud() {
 
     if (data && data.result === 'success') {
       if (Array.isArray(data.products) && data.products.length > 0) {
-        localStorage.setItem('ciy_products', JSON.stringify(data.products));
-        localStorage.setItem('ciy_sync_stamp', CATALOG_SYNC_KEY);
+        localStorage.setItem('vyora_products', JSON.stringify(data.products));
+        localStorage.setItem('vyora_sync_stamp', CATALOG_SYNC_KEY);
         renderProductGrid();
       }
       if (Array.isArray(data.reviews) && data.reviews.length > 0) {
