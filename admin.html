@@ -1116,7 +1116,7 @@ if (data && data.result === 'success') {
 
           // 2. Sync Cloud Products (if sheet has products)
           if (Array.isArray(data.products) && data.products.length > 0) {
-            localStorage.setItem('vyora_products', JSON.stringify(data.products));
+            localStorage.setItem('ciy_products', JSON.stringify(data.products));
             loadArtworksTable();
           }
 
@@ -1160,9 +1160,6 @@ if (data && data.result === 'success') {
       window.location.reload();
     });
 
-    if (sessionStorage.getItem('vyora_admin_logged') === 'true') {
-      unlockDashboard();
-    }
 
     // Media Preview
     const newImageInput = document.getElementById('newImage');
@@ -1368,7 +1365,7 @@ if (data && data.result === 'success') {
         alert(`"${title}" added to your catalog!`);
       }
 
-      localStorage.setItem('vyora_products', JSON.stringify(products));
+      localStorage.setItem('ciy_products', JSON.stringify(products));
       syncProductsToCloud(products);
       resetFormMode();
       loadArtworksTable();
@@ -1378,7 +1375,7 @@ if (data && data.result === 'success') {
       const products = getArtworks();
       if (confirm(`Remove "${products[index].title}"?`)) {
         products.splice(index, 1);
-        localStorage.setItem('vyora_products', JSON.stringify(products));
+        localStorage.setItem('ciy_products', JSON.stringify(products));
         syncProductsToCloud(products);
         loadArtworksTable();
       }
@@ -2268,6 +2265,9 @@ function renderOrderRow(order) {
       printWin.document.write(`<html><body style="margin:0;display:flex;justify-content:center;"><img src="${currentInvoiceDataUrl}" style="max-width:100%;height:auto;" onload="window.print();window.close();"/></body></html>`);
       printWin.document.close();
     });
+    if (sessionStorage.getItem('vyora_admin_logged') === 'true') {
+      unlockDashboard();
+    }
   </script>
 </body>
 </html>

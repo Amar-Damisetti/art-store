@@ -510,14 +510,14 @@ function openQuickView(prod) {
         label.querySelector('input').addEventListener('change', () => {
           selectedPackOption = ps;
           refreshQuickViewPriceDisplay();
-          const isSoldOut = prod.inStock === false;
-  const soldOutBanner = document.getElementById('modalSoldOutBanner');
-  const addCartBtn = document.getElementById('addToCartModalBtn');
-  const buyNowBtn = document.getElementById('openCheckoutModalBtn');
+         const isSoldOut = prod.inStock === false;
+         const soldOutBanner = document.getElementById('modalSoldOutBanner');
+         const addCartBtn = document.getElementById('addToCartModalBtn');
+         const buyNowBtn = document.getElementById('openCheckoutModalBtn');
 
-  if (soldOutBanner) soldOutBanner.style.display = isSoldOut ? 'block' : 'none';
-  if (addCartBtn) addCartBtn.style.display = isSoldOut ? 'none' : 'block';
-  if (buyNowBtn) buyNowBtn.style.display = isSoldOut ? 'none' : 'block';
+         if (soldOutBanner) soldOutBanner.style.setProperty('display', isSoldOut ? 'block' : 'none', 'important');
+         if (addCartBtn) addCartBtn.style.setProperty('display', isSoldOut ? 'none' : 'block', 'important');
+         if (buyNowBtn) buyNowBtn.style.setProperty('display', isSoldOut ? 'none' : 'block', 'important');
           updateLiveCustomSummary();
         });
         packSizeOptionsContainer.appendChild(label);
