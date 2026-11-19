@@ -1161,15 +1161,15 @@
     const logoutBtn = document.getElementById('logoutBtn');
 
     function unlockDashboard() {
-   loginScreen.style.display = 'none';
-   dashboardScreen.style.display = 'block';
-   loadAdminDashboard();
-   loadArtworksTable();
-   loadAdminReviewsTable();
-   loadAdminPromoSettings();
-   loadAdminDeliveryRule();
-   syncOrdersFromGoogleSheet(false);
- }
+      loginOverlay.style.display = 'none';
+      adminContent.style.display = 'block';
+      loadAdminDashboard();
+      loadArtworksTable();
+      loadAdminReviewsTable();
+      loadAdminPromoSettings();
+      loadAdminDeliveryRule();
+      syncOrdersFromGoogleSheet(false);
+    }
     async function syncOrdersFromGoogleSheet(showAlert) {
       const syncBtn = document.getElementById('syncCloudOrdersBtn');
       if (syncBtn) syncBtn.textContent = '⏳ Syncing...';

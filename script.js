@@ -764,9 +764,16 @@ function recalculateCheckoutTotals() {
   if (!currentActiveProduct) return;
 
   const itemPriceNum = getEffectiveUnitPrice(currentActiveProduct) * selectedModalQty;
-  const deliveryFeeNum = parseInt(deliveryZoneSelect ? deliveryZoneSelect.value : '70') || 0;
+  let deliveryFeeNum = parseInt(deliveryZoneSelect ? deliveryZoneSelect.value : '70') || 0;
   const selectedOption = deliveryZoneSelect ? deliveryZoneSelect.options[deliveryZoneSelect.selectedIndex] : null;
   const zoneName = selectedOption ? (selectedOption.getAttribute('data-name') || 'Courier') : 'Courier';
+
+  // Waive ₹40 Kakinada Local Delivery when subtotal meets Admin threshold
+  const freeRule = getFreeDeliveryRule();
+  const rawZoneVal = deliveryZoneSelect ? deliveryZoneSelect.value : '';
+  if (freeRule.enabled && rawZoneVal === '40' && itemPriceNum >= (Number(freeRule.threshold) || 499)) {
+    deliveryFeeNum = 0;
+  }
 
   // Check if Gift Wrap (+₹50) is selected
   const giftWrapCheck = document.getElementById('giftWrapCheck');
@@ -774,10 +781,7 @@ function recalculateCheckoutTotals() {
 
   // Include giftWrapFee in the total
   currentCalculatedTotal = itemPriceNum + deliveryFeeNum + giftWrapFee;
-  const freeRule = getFreeDeliveryRule();
-  if (freeRule.enabled && selectedZone === 'local' && baseSubtotal >= (Number(freeRule.threshold) || 499)) {
-    deliveryFee = 0;
-  }
+
   if (summaryItemPrice) summaryItemPrice.textContent = `₹${itemPriceNum.toLocaleString('en-IN')}`;
   if (summaryDeliveryFee) summaryDeliveryFee.textContent = deliveryFeeNum === 0 ? 'FREE' : `+₹${deliveryFeeNum}`;
   if (summaryGrandTotal) summaryGrandTotal.textContent = `₹${currentCalculatedTotal.toLocaleString('en-IN')}`;
@@ -2255,12 +2259,16 @@ recalculateCheckoutTotals = function() {
   }
 
   const itemPriceNum = vyoraCart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0);
-  const deliveryFeeNum = parseInt(deliveryZoneSelect ? deliveryZoneSelect.value : '70') || 0;
+  let deliveryFeeNum = parseInt(deliveryZoneSelect ? deliveryZoneSelect.value : '70') || 0;
+  const freeRule = getFreeDeliveryRule();
+  const rawZoneVal = deliveryZoneSelect ? deliveryZoneSelect.value : '';
+  if (freeRule.enabled && rawZoneVal === '40' && itemPriceNum >= (Number(freeRule.threshold) || 499)) {
+    deliveryFeeNum = 0;
+  }
   const giftWrapCheck = document.getElementById('giftWrapCheck');
   const giftWrapFee = (giftWrapCheck && giftWrapCheck.checked) ? 50 : 0;
 
   currentCalculatedTotal = itemPriceNum + deliveryFeeNum + giftWrapFee;
-
   if (summaryItemPrice) summaryItemPrice.textContent = `₹${itemPriceNum.toLocaleString('en-IN')}`;
   if (summaryDeliveryFee) summaryDeliveryFee.textContent = deliveryFeeNum === 0 ? 'FREE' : `+₹${deliveryFeeNum}`;
   if (summaryGrandTotal) summaryGrandTotal.textContent = `₹${currentCalculatedTotal.toLocaleString('en-IN')}`;
@@ -2391,7 +2399,7 @@ async function syncStorefrontFromCloud() {
       }
       if (data.deliveryRule) {
         localStorage.setItem('vyora_free_delivery_rule', JSON.stringify(data.deliveryRule));
-        if (typeof renderCartDrawer === 'function') renderCartDrawer();
+        if (typeof renderCartDrawerItems === 'function') renderCartDrawerItems();
       }
     }
   } catch (err) {
