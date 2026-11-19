@@ -504,6 +504,34 @@
           <div id="searchMatchText" class="search-match-text"></div>
         </div>
       </div>
+      <!-- 📋 TODAY'S PREP LIST & SALES SUMMARY -->
+      <div id="prepSummaryBanner" style="background: #fff8f9; border: 1.5px dashed #ffccd5; border-radius: 12px; padding: 14px 18px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <div style="font-size: 0.78rem; font-weight: 700; color: #ff3366; text-transform: uppercase; letter-spacing: 0.5px;">
+            🍳 Today's Pending Prep & Dispatch Queue
+          </div>
+          <div id="pendingPrepItemsList" style="font-size: 0.88rem; color: #22223b; font-weight: 600; margin-top: 4px;">
+            Checking pending orders...
+          </div>
+        </div>
+        <div id="salesPeriodStats" style="display: flex; gap: 12px; flex-wrap: wrap; font-size: 0.82rem;">
+          <span style="background: #fff; border: 1px solid #e5e7eb; padding: 6px 12px; border-radius: 8px; font-weight: 600; color: #374151;">
+            Today's Sales: <strong id="todaySalesAmount" style="color: #059669;">₹0</strong>
+          </span>
+          <span style="background: #fff; border: 1px solid #e5e7eb; padding: 6px 12px; border-radius: 8px; font-weight: 600; color: #374151;">
+            This Month: <strong id="monthSalesAmount" style="color: #0284c7;">₹0</strong>
+          </span>
+        </div>
+      </div>
+
+      <!-- 🏷️ QUICK STATUS FILTER PILLS -->
+      <div id="orderStatusFilterPills" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+        <button type="button" class="order-filter-pill active" data-status-filter="ALL" style="padding: 7px 14px; border-radius: 20px; border: 1.5px solid #ff3366; background: #ff3366; color: #fff; font-weight: 700; font-size: 0.8rem; cursor: pointer;">All Orders</button>
+        <button type="button" class="order-filter-pill" data-status-filter="Pending" style="padding: 7px 14px; border-radius: 20px; border: 1.5px solid #fde68a; background: #fef3c7; color: #b45309; font-weight: 700; font-size: 0.8rem; cursor: pointer;">🟡 Pending</button>
+        <button type="button" class="order-filter-pill" data-status-filter="Crafting" style="padding: 7px 14px; border-radius: 20px; border: 1.5px solid #fed7aa; background: #ffedd5; color: #c2410c; font-weight: 700; font-size: 0.8rem; cursor: pointer;">🟠 In Preparation</button>
+        <button type="button" class="order-filter-pill" data-status-filter="Shipped" style="padding: 7px 14px; border-radius: 20px; border: 1.5px solid #bae6fd; background: #e0f2fe; color: #0369a1; font-weight: 700; font-size: 0.8rem; cursor: pointer;">🔵 Shipped</button>
+        <button type="button" class="order-filter-pill" data-status-filter="Delivered" style="padding: 7px 14px; border-radius: 20px; border: 1.5px solid #bbf7d0; background: #dcfce7; color: #15803d; font-weight: 700; font-size: 0.8rem; cursor: pointer;">🟢 Completed</button>
+      </div>
 
       <table id="ordersTable">
         <thead>
@@ -1554,6 +1582,51 @@ if (data && data.result === 'success') {
       return `<span class="status-badge status-pending">🟡 Pending</span>`;
     }
 
+    let activeOrderStatusFilter = 'ALL';
+
+    function updatePrepAndSalesSummary(orders) {
+      const todayStr = new Date().toLocaleDateString('en-IN');
+      const currentMonthYear = todayStr.split('/').slice(1).join('/'); // e.g. "11/2026"
+
+      let todayTotal = 0;
+      let monthTotal = 0;
+      const prepCounts = {};
+      let activeQueueCount = 0;
+
+      orders.forEach(o => {
+        const amount = parseInt((o.price || '0').replace(/[^0-9]/g, ''), 10) || 0;
+        const oDate = String(o.orderDate || '');
+
+        if (oDate === todayStr) todayTotal += amount;
+        if (currentMonthYear && oDate.endsWith(currentMonthYear)) monthTotal += amount;
+
+        const st = o.status || 'Pending';
+        if (st === 'Pending' || st === 'Crafting') {
+          activeQueueCount++;
+          const label = (o.item || 'Custom Item').trim();
+          prepCounts[label] = (prepCounts[label] || 0) + 1;
+        }
+      });
+
+      const todayEl = document.getElementById('todaySalesAmount');
+      const monthEl = document.getElementById('monthSalesAmount');
+      const prepListEl = document.getElementById('pendingPrepItemsList');
+
+      if (todayEl) todayEl.textContent = '₹' + todayTotal.toLocaleString('en-IN');
+      if (monthEl) monthEl.textContent = '₹' + monthTotal.toLocaleString('en-IN');
+
+      if (prepListEl) {
+        if (activeQueueCount === 0) {
+          prepListEl.innerHTML = `<span style="color:#059669;">✅ All caught up! No pending items waiting to be crafted or baked.</span>`;
+        } else {
+          const summaryChips = Object.entries(prepCounts)
+            .map(([item, count]) => `<span style="display:inline-block; background:#fff; border:1px solid #ffccd5; padding:2px 9px; border-radius:12px; margin:2px 4px 2px 0; font-size:0.8rem;"><strong>${count}×</strong> ${item}</span>`)
+            .join('');
+          prepListEl.innerHTML = summaryChips;
+        }
+      }
+    }
+
     function loadAdminDashboard() {
       const orders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
       const totalOrdersEl = document.getElementById('totalOrders');
@@ -1568,6 +1641,7 @@ if (data && data.result === 'success') {
       });
       totalRevenueEl.textContent = '₹' + totalSum.toLocaleString('en-IN');
 
+      updatePrepAndSalesSummary(orders);
       renderOrdersTableRows();
     }
 
@@ -1670,7 +1744,7 @@ function renderOrderRow(order) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: 'updateStatus', orderId: orders[orderIndex].orderId, status: newStatus })
       }).catch(() => {});
-      renderOrdersTableRows();
+      loadAdminDashboard();
 
       if (newStatus === 'Shipped') {
         if (confirm(`Order ${orders[orderIndex].orderId} marked as Shipped 🚚!\n\nSend the dispatch & tracking message to ${orders[orderIndex].customerName} on WhatsApp now?`)) {
@@ -1712,6 +1786,10 @@ function renderOrderRow(order) {
       const indexedOrders = orders.map((order, originalIndex) => ({ order, originalIndex })).reverse();
 
       const filtered = indexedOrders.filter(({ order }) => {
+      const statusVal = order.status || 'Pending';
+        if (activeOrderStatusFilter !== 'ALL' && statusVal !== activeOrderStatusFilter) {
+          return false;
+        }
         if (!query) return true;
         const nameMatch = (order.customerName || '').toLowerCase().includes(query);
         const phoneMatch = (order.phone || '').toLowerCase().includes(query);
@@ -1787,6 +1865,18 @@ function renderOrderRow(order) {
     if (orderSearchInput) {
       orderSearchInput.addEventListener('input', renderOrdersTableRows);
     }
+    document.querySelectorAll('.order-filter-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        activeOrderStatusFilter = pill.getAttribute('data-status-filter') || 'ALL';
+        document.querySelectorAll('.order-filter-pill').forEach(p => {
+          p.style.outline = 'none';
+          p.style.transform = 'scale(1)';
+        });
+        pill.style.outline = '2.5px solid #22223b';
+        pill.style.transform = 'scale(1.04)';
+        renderOrdersTableRows();
+      });
+    });
 
     window.openEditOrder = function(index) {
       const orders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
@@ -1833,6 +1923,14 @@ function renderOrderRow(order) {
         orders[index].googleMapsLink = editGoogleMapsLink.value.trim();
 
         localStorage.setItem('vyora_orders', JSON.stringify(orders));
+        if (GOOGLE_SHEET_WEBHOOK_URL) {
+          fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: 'editOrder', order: orders[index] })
+          }).catch(err => console.error("Edit order cloud sync failed:", err));
+        }
         alert(`Order "${orders[index].orderId}" updated successfully! New Total: ₹${totalVal}`);
         editOrderModal.style.display = 'none';
         loadAdminDashboard();
@@ -1840,10 +1938,24 @@ function renderOrderRow(order) {
     });
 
     window.deleteOrder = function(index) {
-      if (confirm("Remove this order record?")) {
-        const orders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
+      const orders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
+      const target = orders[index];
+      if (!target) return;
+
+      if (confirm(`Remove order "${target.orderId}" from both Admin Panel and Google Sheet?`)) {
+        const deletedOrderId = target.orderId;
         orders.splice(index, 1);
         localStorage.setItem('vyora_orders', JSON.stringify(orders));
+
+        if (GOOGLE_SHEET_WEBHOOK_URL && deletedOrderId) {
+          fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: 'deleteOrder', orderId: deletedOrderId })
+          }).catch(err => console.error("Delete order cloud sync failed:", err));
+        }
+
         loadAdminDashboard();
       }
     };
