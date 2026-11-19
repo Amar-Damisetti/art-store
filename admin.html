@@ -1117,18 +1117,21 @@
       if (syncBtn) syncBtn.textContent = '⏳ Syncing...';
 
       try {
-        const res = await fetch(GOOGLE_SHEET_WEBHOOK_URL);
+        const res = await fetch(`${GOOGLE_SHEET_WEBHOOK_URL}?t=${Date.now()}`);
         const data = await res.json();
 
-if (data && data.result === 'success') {
-          // 1. Merge Orders
+        if (data && data.result === 'success') {
+          // 1. Merge Orders (skip recently deleted IDs)
           if (Array.isArray(data.orders)) {
+            const deletedIds = JSON.parse(localStorage.getItem('vyora_deleted_order_ids') || '[]');
             const localOrders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
             const mergedMap = new Map();
 
-            localOrders.forEach(o => { if (o.orderId) mergedMap.set(o.orderId, o); });
+            localOrders.forEach(o => {
+              if (o.orderId && !deletedIds.includes(o.orderId)) mergedMap.set(o.orderId, o);
+            });
             data.orders.forEach(cloudOrder => {
-              if (!cloudOrder.orderId) return;
+              if (!cloudOrder.orderId || deletedIds.includes(cloudOrder.orderId)) return;
               if (mergedMap.has(cloudOrder.orderId)) {
                 const existing = mergedMap.get(cloudOrder.orderId);
                 existing.status = cloudOrder.status || existing.status;
@@ -1937,7 +1940,7 @@ function renderOrderRow(order) {
       }
     });
 
-    window.deleteOrder = function(index) {
+   window.deleteOrder = function(index) {
       const orders = JSON.parse(localStorage.getItem('vyora_orders') || '[]');
       const target = orders[index];
       if (!target) return;
@@ -1946,6 +1949,14 @@ function renderOrderRow(order) {
         const deletedOrderId = target.orderId;
         orders.splice(index, 1);
         localStorage.setItem('vyora_orders', JSON.stringify(orders));
+
+        if (deletedOrderId) {
+          const deletedIds = JSON.parse(localStorage.getItem('vyora_deleted_order_ids') || '[]');
+          if (!deletedIds.includes(deletedOrderId)) {
+            deletedIds.push(deletedOrderId);
+            localStorage.setItem('vyora_deleted_order_ids', JSON.stringify(deletedIds));
+          }
+        }
 
         if (GOOGLE_SHEET_WEBHOOK_URL && deletedOrderId) {
           fetch(GOOGLE_SHEET_WEBHOOK_URL, {
