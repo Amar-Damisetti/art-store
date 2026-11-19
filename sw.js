@@ -1,8 +1,7 @@
-const CACHE_NAME = 'vyora-v3-network-first';
+const CACHE_NAME = 'vyora-v4-network-first';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './admin.html',
   './style.css',
   './script.js',
   './manifest.json',
