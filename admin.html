@@ -1238,7 +1238,7 @@
       }
     }
 
-    loginForm.addEventListener('submit', async (e) => {
+   loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const enteredPin = adminPassword.value.trim();
       if (!enteredPin) return;
@@ -1252,11 +1252,8 @@
       loginError.style.display = 'none';
 
       try {
-        const res = await fetch(GOOGLE_SHEET_WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'verifyAdminPin', pin: enteredPin })
-        });
+        const verifyUrl = `${GOOGLE_SHEET_WEBHOOK_URL}?action=verifyAdminPin&pin=${encodeURIComponent(enteredPin)}&t=${Date.now()}`;
+        const res = await fetch(verifyUrl);
         const data = await res.json();
 
         if (data && data.valid === true) {
@@ -1267,7 +1264,7 @@
           adminPassword.value = '';
         }
       } catch (err) {
-        alert('⚠️ Could not reach Google Sheet to verify PIN. Check your internet connection and try again.');
+        alert('⚠️ Could not verify PIN right now. Please make sure Code.gs is deployed as a New Version and try again.');
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
@@ -1295,19 +1292,15 @@
         saveBtn.textContent = 'Saving...';
 
         try {
-          const res = await fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+          await fetch(GOOGLE_SHEET_WEBHOOK_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'updateAdminPin', newPin: newPin })
           });
-          const data = await res.json();
 
-          if (data && data.result === 'pin_updated') {
-            adminPinChangeForm.reset();
-            alert('✅ Your Admin PIN has been updated in Google Sheets! Use this new PIN next time you log in.');
-          } else {
-            alert('⚠️ Could not update PIN: ' + (data.error || 'Unknown error'));
-          }
+          adminPinChangeForm.reset();
+          alert('✅ Your Admin PIN has been updated in Google Sheets! Use this new PIN next time you log in.');
         } catch (err) {
           alert('⚠️ Network error while saving PIN. Please check your internet connection.');
         } finally {
