@@ -749,6 +749,34 @@
       </form>
     </div>
 
+    <!-- 6. Admin Security PIN Manager -->
+    <div class="table-container" style="margin-top: 25px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h3 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #22223b;">
+            🔐 Admin Dashboard Security PIN
+          </h3>
+          <p style="font-size: 0.85rem; color: #6b7280;">
+            Your PIN is stored privately in your Google Sheet <strong>Settings</strong> tab—never exposed in your public GitHub code.
+          </p>
+        </div>
+      </div>
+
+      <form id="adminPinChangeForm" style="background: #f9fafb; border: 1.5px solid #e5e7eb; padding: 18px; border-radius: 12px; display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 220px;">
+          <label style="margin-top: 0; font-size: 0.82rem; font-weight: 600; color: #374151;">New Secret PIN (4–12 digits or characters) *</label>
+          <input type="password" id="newAdminPinInput" placeholder="Enter new custom PIN" minlength="4" maxlength="12" required style="letter-spacing: 2px; font-weight: 700;" />
+        </div>
+        <div style="flex: 1; min-width: 220px;">
+          <label style="margin-top: 0; font-size: 0.82rem; font-weight: 600; color: #374151;">Confirm New PIN *</label>
+          <input type="password" id="confirmAdminPinInput" placeholder="Re-enter new PIN" minlength="4" maxlength="12" required style="letter-spacing: 2px; font-weight: 700;" />
+        </div>
+        <button type="submit" id="saveAdminPinBtn" class="btn btn-add-art" style="padding: 11px 22px; height: 44px;">
+          Update PIN 🔐
+        </button>
+      </form>
+    </div>
+
   <!-- POPUP MODAL 1: EDIT EXISTING ORDER -->
   <div class="modal-overlay" id="editOrderModal">
     <div class="modal-box-card">
@@ -969,7 +997,6 @@
     if (urlKey !== OWNER_ACCESS_KEY && sessionStorage.getItem("vyora_admin_logged") !== "true") {
       window.location.replace("index.html");
     }
-    const ADMIN_SECRET_PIN = "1234";
 
     // 👉 PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE (For syncing offline orders to Google Sheet):
     const GOOGLE_SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzHfZ1iBj5eNPNeZi_hBTSLijoKjAnsFTbd0m54dS5fFxYAhYDdD9M2w4ezQJjI5vFVUg/exec";
@@ -1175,16 +1202,84 @@
       }
     }
 
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (adminPassword.value === ADMIN_SECRET_PIN) {
-        sessionStorage.setItem('vyora_admin_logged', 'true');
-        unlockDashboard();
-      } else {
-        loginError.style.display = 'block';
-        adminPassword.value = '';
+      const enteredPin = adminPassword.value.trim();
+      if (!enteredPin) return;
+
+      const submitBtn = loginForm.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn ? submitBtn.textContent : 'Unlock Dashboard';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Verifying PIN...';
+      }
+      loginError.style.display = 'none';
+
+      try {
+        const res = await fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'verifyAdminPin', pin: enteredPin })
+        });
+        const data = await res.json();
+
+        if (data && data.valid === true) {
+          sessionStorage.setItem('vyora_admin_logged', 'true');
+          unlockDashboard();
+        } else {
+          loginError.style.display = 'block';
+          adminPassword.value = '';
+        }
+      } catch (err) {
+        alert('⚠️ Could not reach Google Sheet to verify PIN. Check your internet connection and try again.');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalBtnText;
+        }
       }
     });
+
+    const adminPinChangeForm = document.getElementById('adminPinChangeForm');
+    if (adminPinChangeForm) {
+      adminPinChangeForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newPin = document.getElementById('newAdminPinInput').value.trim();
+        const confirmPin = document.getElementById('confirmAdminPinInput').value.trim();
+        const saveBtn = document.getElementById('saveAdminPinBtn');
+
+        if (newPin.length < 4) {
+          return alert('Please enter a PIN with at least 4 characters.');
+        }
+        if (newPin !== confirmPin) {
+          return alert('⚠️ The two PIN fields do not match. Please re-enter them.');
+        }
+
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving...';
+
+        try {
+          const res = await fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'updateAdminPin', newPin: newPin })
+          });
+          const data = await res.json();
+
+          if (data && data.result === 'pin_updated') {
+            adminPinChangeForm.reset();
+            alert('✅ Your Admin PIN has been updated in Google Sheets! Use this new PIN next time you log in.');
+          } else {
+            alert('⚠️ Could not update PIN: ' + (data.error || 'Unknown error'));
+          }
+        } catch (err) {
+          alert('⚠️ Network error while saving PIN. Please check your internet connection.');
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Update PIN 🔐';
+        }
+      });
+    }
 
     logoutBtn.addEventListener('click', () => {
       sessionStorage.removeItem('vyora_admin_logged');
