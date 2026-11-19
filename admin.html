@@ -749,6 +749,36 @@
       </form>
     </div>
 
+    <!-- 5B. Free Local Delivery Progress Bar Manager -->
+    <div class="table-container" style="margin-top: 25px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h3 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #22223b;">
+            🚚 Free Kakinada Local Delivery Progress Bar
+          </h3>
+          <p style="font-size: 0.85rem; color: #6b7280;">
+            Set the minimum cart amount required to unlock FREE Kakinada local delivery (₹40 waived automatically at checkout).
+          </p>
+        </div>
+      </div>
+
+      <form id="adminDeliveryRuleForm" style="background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 18px; border-radius: 12px; display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 200px;">
+          <label style="margin-top: 0; display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; color: #15803d; height: 42px;">
+            <input type="checkbox" id="freeDeliveryEnabled" checked style="width: auto; accent-color: #059669;">
+            <span>Enable Free Local Delivery Bar</span>
+          </label>
+        </div>
+        <div style="flex: 1; min-width: 220px;">
+          <label style="margin-top: 0; font-size: 0.82rem; font-weight: 600; color: #374151;">Minimum Cart Subtotal (₹) *</label>
+          <input type="number" id="freeDeliveryThreshold" value="499" min="50" step="1" required style="font-weight: 700;" />
+        </div>
+        <button type="submit" id="saveDeliveryRuleBtn" class="btn btn-add-art" style="padding: 11px 22px; height: 44px; background: #059669;">
+          Save Delivery Rule 🚚
+        </button>
+      </form>
+    </div>
+
     <!-- 6. Admin Security PIN Manager -->
     <div class="table-container" style="margin-top: 25px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
@@ -1131,14 +1161,15 @@
     const logoutBtn = document.getElementById('logoutBtn');
 
     function unlockDashboard() {
-      loginOverlay.style.display = 'none';
-      adminContent.style.display = 'block';
-      loadAdminDashboard();
-      loadArtworksTable();
-      loadAdminReviewsTable();
-      loadAdminPromoSettings();
-      syncOrdersFromGoogleSheet(false);
-    }
+   loginScreen.style.display = 'none';
+   dashboardScreen.style.display = 'block';
+   loadAdminDashboard();
+   loadArtworksTable();
+   loadAdminReviewsTable();
+   loadAdminPromoSettings();
+   loadAdminDeliveryRule();
+   syncOrdersFromGoogleSheet(false);
+ }
     async function syncOrdersFromGoogleSheet(showAlert) {
       const syncBtn = document.getElementById('syncCloudOrdersBtn');
       if (syncBtn) syncBtn.textContent = '⏳ Syncing...';
@@ -1188,6 +1219,11 @@
           if (data.promo && typeof data.promo === 'object') {
             localStorage.setItem('vyora_promo_settings', JSON.stringify(data.promo));
             loadAdminPromoSettings();
+          }
+          // 5. Sync Free Delivery Rule
+          if (data.deliveryRule) {
+            localStorage.setItem('vyora_free_delivery_rule', JSON.stringify(data.deliveryRule));
+            loadAdminDeliveryRule();
           }
 
           if (showAlert) {
@@ -2483,6 +2519,44 @@ function renderOrderRow(order) {
       printWin.document.write(`<html><body style="margin:0;display:flex;justify-content:center;"><img src="${currentInvoiceDataUrl}" style="max-width:100%;height:auto;" onload="window.print();window.close();"/></body></html>`);
       printWin.document.close();
     });
+    function loadAdminDeliveryRule() {
+      const rule = JSON.parse(localStorage.getItem('vyora_free_delivery_rule') || '{"enabled":true,"threshold":499}');
+      const enabledEl = document.getElementById('freeDeliveryEnabled');
+      const thresholdEl = document.getElementById('freeDeliveryThreshold');
+      if (enabledEl) enabledEl.checked = rule.enabled !== false;
+      if (thresholdEl) thresholdEl.value = Number(rule.threshold) || 499;
+    }
+
+    const adminDeliveryRuleForm = document.getElementById('adminDeliveryRuleForm');
+    if (adminDeliveryRuleForm) {
+      adminDeliveryRuleForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const enabled = document.getElementById('freeDeliveryEnabled').checked;
+        const threshold = Math.max(50, parseInt(document.getElementById('freeDeliveryThreshold').value, 10) || 499);
+        const btn = document.getElementById('saveDeliveryRuleBtn');
+
+        const ruleObj = { enabled, threshold };
+        localStorage.setItem('vyora_free_delivery_rule', JSON.stringify(ruleObj));
+
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+
+        try {
+          await fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'syncDeliveryRule', deliveryRule: ruleObj })
+          });
+          alert(`✅ Free Local Delivery rule updated!\nStatus: ${enabled ? 'ON' : 'OFF'}\nThreshold: ₹${threshold}`);
+        } catch (err) {
+          alert('Saved locally, but could not sync to Google Sheet.');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Save Delivery Rule 🚚';
+        }
+      });
+    }
     if (sessionStorage.getItem('vyora_admin_logged') === 'true') {
       unlockDashboard();
     }

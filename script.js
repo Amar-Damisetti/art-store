@@ -774,7 +774,10 @@ function recalculateCheckoutTotals() {
 
   // Include giftWrapFee in the total
   currentCalculatedTotal = itemPriceNum + deliveryFeeNum + giftWrapFee;
-
+  const freeRule = getFreeDeliveryRule();
+  if (freeRule.enabled && selectedZone === 'local' && baseSubtotal >= (Number(freeRule.threshold) || 499)) {
+    deliveryFee = 0;
+  }
   if (summaryItemPrice) summaryItemPrice.textContent = `₹${itemPriceNum.toLocaleString('en-IN')}`;
   if (summaryDeliveryFee) summaryDeliveryFee.textContent = deliveryFeeNum === 0 ? 'FREE' : `+₹${deliveryFeeNum}`;
   if (summaryGrandTotal) summaryGrandTotal.textContent = `₹${currentCalculatedTotal.toLocaleString('en-IN')}`;
@@ -2109,6 +2112,47 @@ function changeCartItemQty(index, delta) {
   saveCartToStorage();
   renderCartDrawerItems();
 }
+function getFreeDeliveryRule() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('vyora_free_delivery_rule') || 'null');
+    if (saved && typeof saved.threshold === 'number') return saved;
+  } catch (err) {}
+  return { enabled: true, threshold: 499 };
+}
+
+function updateFreeDeliveryProgressBar(subtotal) {
+  const wrap = document.getElementById('freeDeliveryProgressWrap');
+  const textEl = document.getElementById('freeDeliveryProgressText');
+  const fillEl = document.getElementById('freeDeliveryProgressFill');
+  if (!wrap || !textEl || !fillEl) return;
+
+  const rule = getFreeDeliveryRule();
+  if (!rule.enabled) {
+    wrap.style.display = 'none';
+    return;
+  }
+
+  wrap.style.display = 'block';
+  const threshold = Number(rule.threshold) || 499;
+  const remaining = Math.max(0, threshold - subtotal);
+  const pct = Math.min(100, Math.round((subtotal / threshold) * 100));
+
+  fillEl.style.width = pct + '%';
+
+  if (remaining === 0 && subtotal > 0) {
+    wrap.style.background = '#f0fdf4';
+    wrap.style.borderColor = '#86efac';
+    fillEl.style.background = 'linear-gradient(90deg, #059669, #10b981)';
+    textEl.style.color = '#15803d';
+    textEl.innerHTML = '🎉 You unlocked <strong>FREE Kakinada Local Delivery!</strong>';
+  } else {
+    wrap.style.background = '#fff8f9';
+    wrap.style.borderColor = '#ffccd5';
+    fillEl.style.background = 'linear-gradient(90deg, #ff3366, #ff758c)';
+    textEl.style.color = '#22223b';
+    textEl.innerHTML = `Add <strong>₹${remaining.toLocaleString('en-IN')}</strong> more for <strong>FREE Kakinada local delivery!</strong>`;
+  }
+}
 
 function renderCartDrawerItems() {
   const container = document.getElementById('cartItemsContainer');
@@ -2150,6 +2194,7 @@ function renderCartDrawerItems() {
   });
 
   if (subtotalEl) subtotalEl.textContent = `₹${subtotal.toLocaleString('en-IN')}`;
+  updateFreeDeliveryProgressBar(subtotal);
 }
 
 // Wire Add to Cart button inside Product Quick-View Modal
@@ -2343,6 +2388,10 @@ async function syncStorefrontFromCloud() {
         if (data.promo && typeof data.promo === 'object') {
         localStorage.setItem('vyora_promo_settings', JSON.stringify(data.promo));
         syncStorePromoVisibility();
+      }
+      if (data.deliveryRule) {
+        localStorage.setItem('vyora_free_delivery_rule', JSON.stringify(data.deliveryRule));
+        if (typeof renderCartDrawer === 'function') renderCartDrawer();
       }
     }
   } catch (err) {
